@@ -70,7 +70,7 @@ namespace cdc
 	private:
 		MSFileSource* m_FileSource;
 
-		char m_Buffer[1050624];
+		char m_Buffer[0x100800];
 		int m_BytesInBuffer;
 
 		unsigned int m_BufferOffset;
