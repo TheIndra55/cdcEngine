@@ -183,7 +183,7 @@ bool cdc::MSFileSystem::ProcessBuffer(char* buffer, Request* request, bool isRea
 	return bytes == 0;
 }
 
-cdc::FileRequest* cdc::MSFileSystem::RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset)
+cdc::MSFileSystem::Request* cdc::MSFileSystem::PopFreeRequest()
 {
 	auto request = m_Free;
 	m_Free = request->m_Next;
@@ -191,9 +191,21 @@ cdc::FileRequest* cdc::MSFileSystem::RequestRead(FileReceiver* receiver, const c
 
 	m_numUsedRequests++;
 
+	return request;
+}
+
+cdc::FileRequest* cdc::MSFileSystem::RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset)
+{
+	auto request = PopFreeRequest();
+
 	request->Init(receiver, fileName, 0, startOffset);
 
 	return request;
+}
+
+cdc::File* cdc::MSFileSystem::OpenFile(const char* fileName)
+{
+	return new File(fileName, this);
 }
 
 bool cdc::MSFileSystem::FileExists(const char* fileName)
@@ -496,4 +508,34 @@ void cdc::MSFileSystem::Request::Cancel()
 float cdc::MSFileSystem::Request::Completed()
 {
 	return 0.f;
+}
+
+cdc::MSFileSystem::File::File(const char* fileName, MSFileSystem* fileSystem)
+{
+	m_FileSystem = fileSystem;
+	m_pRequest = nullptr;
+
+	strcpy(m_pFileName, fileName);
+
+	m_FileHandle = fileSystem->m_FileSource->Open(fileName);
+
+	if (!m_FileHandle)
+	{
+		cdc::FatalError("Failed to open %s", fileName);
+	}
+}
+
+cdc::FileRequest* cdc::MSFileSystem::File::RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset)
+{
+	auto request = m_FileSystem->PopFreeRequest();
+	m_pRequest = request;
+
+	request->Init(receiver, fileName, m_FileHandle, startOffset);
+
+	return request;
+}
+
+unsigned int cdc::MSFileSystem::File::GetSize()
+{
+	return m_FileSystem->m_FileSource->GetSize(m_FileHandle);
 }

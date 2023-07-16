@@ -69,6 +69,23 @@ namespace cdc
 			float Completed();
 		};
 
+		class File : public cdc::File
+		{
+		private:
+			MSFileSystem* m_FileSystem;
+
+			int m_FileHandle;
+			char m_pFileName[128];
+
+			MSFileSystem::Request* m_pRequest;
+
+		public:
+			File(const char* fileName, MSFileSystem* fileSystem);
+
+			FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
+			unsigned int GetSize();
+		};
+
 	private:
 		MSFileSource* m_FileSource;
 
@@ -96,8 +113,10 @@ namespace cdc
 		void RemoveFromQueue(Request* request);
 		unsigned int RoundToSectors(unsigned int size);
 		bool ProcessBuffer(char* buffer, Request* request, bool isReading);
+		Request* PopFreeRequest();
 
 		FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
+		cdc::File* OpenFile(const char* fileName);
 		bool FileExists(const char* fileName);
 		unsigned int GetFileSize(const char* fileName);
 		void SetSpecialisationMask(unsigned int specMask);

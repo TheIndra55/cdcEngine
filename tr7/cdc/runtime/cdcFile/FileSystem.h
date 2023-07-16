@@ -41,6 +41,13 @@ namespace cdc
 		virtual void ReceiveDone(FileRequest* request) = 0;
 	};
 
+	class File
+	{
+	public:
+		virtual FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset) = 0;
+		virtual unsigned int GetSize() = 0;
+	};
+
 	class FileSystem
 	{
 	public:
@@ -51,6 +58,7 @@ namespace cdc
 		};
 
 		virtual FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset) = 0;
+		virtual File* OpenFile(const char* fileName) = 0;
 		virtual bool FileExists(const char* fileName) = 0;
 		virtual unsigned int GetFileSize(const char* fileName) = 0;
 		virtual void SetSpecialisationMask(unsigned int specMask) = 0;
