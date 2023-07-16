@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include "game/Save/MSSave.h"
+#include "game/Main.h"
 #include "gamewindow.h"
 
 HANDLE hMainThread;
@@ -23,6 +24,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	}
 
 	MSSave::Create();
+
+	InitFS();
 
 	return 0;
 }
