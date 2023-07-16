@@ -4,6 +4,7 @@
 #include "game/Save/MSSave.h"
 #include "game/Main.h"
 #include "gamewindow.h"
+#include "timer.h"
 
 HANDLE hMainThread;
 
@@ -26,6 +27,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	MSSave::Create();
 
 	InitFS();
+	TIMER_Init();
 
 	return 0;
 }
