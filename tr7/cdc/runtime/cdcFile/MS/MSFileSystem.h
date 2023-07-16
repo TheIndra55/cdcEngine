@@ -58,6 +58,8 @@ namespace cdc
 
 			Request* m_Next;
 
+			void Init(FileReceiver* receiver, const char* fileName, unsigned int fileHandle, unsigned int startOffset);
+
 			void AddRef();
 			void SetCompressedSize(unsigned int compressedSize);
 			void SetSize(unsigned int size);
@@ -90,6 +92,7 @@ namespace cdc
 		MSFileSystem(const char* basePath);
 
 		void SetupRequests();
+		void PutInQueue(Request* request, cdc::FileRequest::Priority priority);
 
 		FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
 		bool FileExists(const char* fileName);
