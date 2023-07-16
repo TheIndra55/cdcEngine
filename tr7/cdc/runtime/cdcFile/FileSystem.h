@@ -34,6 +34,11 @@ namespace cdc
 
 	class FileReceiver
 	{
+	public:
+		virtual int ReceiveData(const char* data, unsigned int dataSize, unsigned int requestOffset) = 0;
+		virtual void ReceiveStarted(FileRequest* request, unsigned int requestSize) = 0;
+		virtual void ReceiveCancelled(FileRequest* request) = 0;
+		virtual void ReceiveDone(FileRequest* request) = 0;
 	};
 
 	class FileSystem

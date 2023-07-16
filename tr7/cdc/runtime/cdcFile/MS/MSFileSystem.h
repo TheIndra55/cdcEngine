@@ -93,6 +93,9 @@ namespace cdc
 
 		void SetupRequests();
 		void PutInQueue(Request* request, cdc::FileRequest::Priority priority);
+		void RemoveFromQueue(Request* request);
+		unsigned int RoundToSectors(unsigned int size);
+		bool ProcessBuffer(char* buffer, Request* request, bool isReading);
 
 		FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
 		bool FileExists(const char* fileName);

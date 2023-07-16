@@ -1,6 +1,8 @@
 #include "MSFileSystem.h"
 #include "MSFileSources.h"
 
+#include "cdc/runtime/cdcSys/Assert.h"
+
 cdc::MSFileSystem::MSFileSystem(const char* basePath)
 	: m_Requests{}, m_Queue(nullptr), m_Free(nullptr), m_numUsedRequests(0)
 {
@@ -61,6 +63,126 @@ void cdc::MSFileSystem::PutInQueue(Request* request, cdc::FileRequest::Priority 
 	}
 }
 
+void cdc::MSFileSystem::RemoveFromQueue(Request* request)
+{
+	auto next = m_Queue;
+
+	if (next == request)
+	{
+		m_Queue = request->m_Next;
+
+		return;
+	}
+
+	while (next->m_Next)
+	{
+		if (next == request)
+		{
+			break;
+		}
+
+		next = next->m_Next;
+	}
+
+	if (next->m_Next != nullptr)
+	{
+		next->m_Next = next->m_Next->m_Next;
+	}
+}
+
+unsigned int cdc::MSFileSystem::RoundToSectors(unsigned int size)
+{
+	if ((size & 0x7FF) != 0)
+	{
+		return 0x800 - (size & 0x7FF) + size;
+	}
+
+	return size;
+}
+
+bool cdc::MSFileSystem::ProcessBuffer(char* buffer, Request* request, bool isReading)
+{
+	auto size = m_BytesInBuffer;
+
+	if (size == 0)
+	{
+		return true;
+	}
+
+	auto skipSize = request->m_SkipSize;
+
+	if (skipSize >= size)
+	{
+		request->m_BytesProcessed += size;
+		request->m_SkipSize -= m_BytesInBuffer;
+
+		if (isReading)
+		{
+			m_BufferOffset += m_BytesInBuffer;
+		}
+		else
+		{
+			m_BufferOffset = 0;
+		}
+
+		m_BytesInBuffer = 0;
+
+		return true;
+	}
+
+	auto readSize = size - skipSize;
+	auto bytesRead = request->m_pReceiver->ReceiveData(&buffer[skipSize + m_BufferOffset], readSize, skipSize + request->m_BytesProcessed);
+
+	auto bufferBytes = 0;
+	if ((bytesRead - readSize) <= 0)
+	{
+		bufferBytes = request->m_SkipSize + bytesRead;
+		request->m_SkipSize = 0;
+	}
+	else
+	{
+		bufferBytes = m_BytesInBuffer;
+		request->m_SkipSize = bytesRead - readSize;
+	}
+
+	auto bytesLeft = m_BytesInBuffer - bufferBytes;
+
+	if (bytesLeft == 0)
+	{
+		if (isReading)
+		{
+			m_BufferOffset += bufferBytes;
+		}
+		else
+		{
+			m_BufferOffset = (bufferBytes - m_BytesInBuffer) & 3;
+
+			memmove(&buffer[m_BufferOffset], &buffer[m_BufferOffset + bufferBytes], bytesLeft);
+		}
+
+		request->m_BytesProcessed += bufferBytes;
+		m_BytesInBuffer = bytesLeft;
+
+		return bytesLeft == 0;
+	}
+
+	request->m_BytesProcessed += bufferBytes;
+	m_BytesInBuffer = 0;
+
+	auto bytes = 0;
+	if (isReading)
+	{
+		bytes = this->m_BytesInBuffer;
+		m_BufferOffset += bufferBytes;
+	}
+	else
+	{
+		m_BufferOffset = 0;
+	}
+
+	return bytes == 0;
+}
+
 cdc::FileRequest* cdc::MSFileSystem::RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset)
 {
 	auto request = m_Free;
@@ -95,11 +217,197 @@ unsigned int cdc::MSFileSystem::GetSpecialisationMask()
 
 cdc::FileSystem::Status cdc::MSFileSystem::GetStatus()
 {
-	return IDLE;
+	return m_Queue == 0 ? IDLE : BUSY;
 }
 
 void cdc::MSFileSystem::Update()
 {
+	while (true)
+	{
+		auto request = m_Queue;
+
+		if (!request)
+		{
+			return;
+		}
+
+		auto priority = request->m_Priority;
+		auto buffer = &m_Buffer[0x80400];
+
+		if (priority)
+		{
+			buffer = m_Buffer;
+		}
+
+		switch (request->m_ReadState)
+		{
+		case READ_STATE_INIT:
+			if (request->m_IsCancelled)
+			{
+				request->m_ReadState = READ_STATE_EXIT;
+				break;
+			}
+
+			request->m_Status = cdc::FileRequest::PROCESSING;
+			request->m_pReceiver->ReceiveStarted(request, request->m_Size);
+
+			if (!request->m_FileHandle)
+			{
+				auto handle = m_FileSource->Open(request->m_pFileName);
+
+				request->m_FileHandle = handle;
+				request->m_CloseFile = true;
+			}
+
+			if (request->m_FileHandle)
+			{
+				request->m_ReadState = READ_STATE_READ;
+				request->m_BytesRead = 0;
+				request->m_BytesProcessed = 0;
+
+				m_BufferOffset = 0;
+				m_BytesInBuffer = 0;
+				m_FileOffset = request->m_Offset;
+			}
+			else
+			{
+				cdc::FatalError("Failed to open %s", request->m_pFileName);
+				request->m_ReadState = READ_STATE_EXIT;
+			}
+
+			break;
+		case READ_STATE_READ:
+		{
+			if (request->m_IsCancelled)
+			{
+				request->m_ReadState = READ_STATE_EXIT;
+				break;
+			}
+
+			auto skipSize = request->m_SkipSize;
+
+			if (skipSize + request->m_BytesProcessed == request->m_Size)
+			{
+				request->m_ReadState = READ_STATE_EXIT;
+				break;
+			}
+
+			if (skipSize > 0x40000)
+			{
+				auto offset = this->m_FileOffset + skipSize;
+				this->m_FileOffset = offset;
+
+				skipSize = offset & 0x7FF;
+				request->m_SkipSize = skipSize;
+
+				this->m_FileOffset = this->m_FileOffset - skipSize;
+
+				request->m_BytesRead += this->m_FileOffset - offset;
+				request->m_BytesProcessed += this->m_FileOffset - offset;
+			}
+
+			auto target = &buffer[m_BytesInBuffer + m_BufferOffset];
+			auto numReadBytes = 0x100000 - this->m_BytesInBuffer - this->m_BufferOffset;
+
+			auto readSize = request->m_Size - request->m_BytesRead;
+			if (numReadBytes < readSize)
+			{
+				numReadBytes = readSize;
+			}
+
+			if (numReadBytes > 0x80000)
+			{
+				numReadBytes = 0x80000;
+			}
+
+			numReadBytes = RoundToSectors(numReadBytes);
+
+			if (numReadBytes + this->m_BytesInBuffer > 0x100800)
+			{
+				numReadBytes -= 0x800;
+			}
+
+			if (m_FileSource->Read(request->m_FileHandle, m_FileOffset, numReadBytes, target))
+			{
+				request->m_ReadState = READ_STATE_READING;
+				return;
+			}
+
+			break;
+		}
+		case READ_STATE_READING:
+		{
+			unsigned int numBytesRead = 0;
+
+			if (m_FileSource->GetReadResult(request->m_FileHandle, &numBytesRead))
+			{
+				m_BytesInBuffer += numBytesRead;
+				m_FileOffset = numBytesRead + this->m_FileOffset;
+
+				request->m_BytesRead += numBytesRead;
+
+				if (request->m_BytesRead > request->m_Size)
+				{
+					m_BytesInBuffer += request->m_Size - request->m_BytesRead;
+				}
+
+				request->m_ReadState = READ_STATE_PROCESSING;
+
+				break;
+			}
+
+			ProcessBuffer(buffer, request, true);
+
+			return;
+		}
+		case READ_STATE_PROCESSING:
+			ProcessBuffer(buffer, request, false);
+
+			if (request->m_BytesRead >= request->m_Size)
+			{
+				if (request->m_BytesProcessed >= request->m_Size)
+				{
+					request->m_ReadState = READ_STATE_EXIT;
+				}
+			}
+			else
+			{
+				request->m_ReadState = READ_STATE_READ;
+			}
+
+			break;
+		case READ_STATE_PAUSED:
+			m_BytesInBuffer = m_PausedBytesInBuffer;
+			m_BufferOffset = m_PausedBufferOffset;
+			m_FileOffset = m_PausedFileOffset;
+			
+			request->m_ReadState = m_PausedReadState;
+
+			break;
+		case READ_STATE_EXIT:
+			if (request->m_CloseFile)
+			{
+				m_FileSource->Close(request->m_FileHandle);
+				request->m_FileHandle = 0;
+			}
+
+			if (request->m_IsCancelled)
+			{
+				request->m_pReceiver->ReceiveCancelled(request);
+				request->m_Status = cdc::FileRequest::CANCELLED;
+			}
+			else
+			{
+				request->m_pReceiver->ReceiveDone(request);
+				request->m_Status = cdc::FileRequest::DONE;
+			}
+
+			RemoveFromQueue(request);
+			request->m_ReadState = READ_STATE_DONE;
+
+			break;
+		}
+	}
 }
 
 void cdc::MSFileSystem::Synchronize()
