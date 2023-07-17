@@ -6,6 +6,7 @@
 #include "game/Main.h"
 #include "gamewindow.h"
 #include "timer.h"
+#include "setup.h"
 
 HANDLE hMainThread;
 
@@ -38,6 +39,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	}
 
 	localstr_set_language(language_default);
+
+	SETUP_LocalizeSetupDialog();
 
 	return 0;
 }
