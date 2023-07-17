@@ -15,8 +15,8 @@
 cdc::FileSystem* g_pDiskFS;
 cdc::FileSystem* g_pFS;
 
-static char ActiveBuildName[16];
-static char ActiveBuildDir[32];
+char ActiveBuildName[16];
+char ActiveBuildDir[32];
 
 cdc::FileSystem* GetFS()
 {

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 
 #include "game/Save/MSSave.h"
+#include "game/local/localstr.h"
 #include "game/Main.h"
 #include "gamewindow.h"
 #include "timer.h"
@@ -30,6 +31,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	TIMER_Init();
 	InitArchive();
 	SetupBuildDir("PC-W");
+
+	if (!localstr_verifyexistence())
+	{
+		SetupBuildDir("PCENGLISH");
+	}
+
+	localstr_set_language(language_default);
 
 	return 0;
 }

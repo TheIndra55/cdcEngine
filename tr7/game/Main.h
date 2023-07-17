@@ -2,6 +2,9 @@
 
 #include "cdc/runtime/cdcFile/FileSystem.h"
 
+extern char ActiveBuildName[16];
+extern char ActiveBuildDir[32];
+
 cdc::FileSystem* GetFS();
 
 void InitFS();
