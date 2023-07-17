@@ -28,6 +28,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 
 	InitFS();
 	TIMER_Init();
+	InitArchive();
 
 	return 0;
 }

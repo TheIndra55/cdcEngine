@@ -41,6 +41,7 @@ void cdc::MSFileSourceDisk::Close(int fileHandle)
 bool cdc::MSFileSourceDisk::Read(int fileHandle, unsigned int offset, unsigned int numReadBytes, void* target)
 {
 	this->m_Overlapped = {};
+	this->m_Overlapped.Offset = offset;
 
 	if (ReadFile((HANDLE)fileHandle, target, numReadBytes, NULL, &this->m_Overlapped) || GetLastError() == ERROR_IO_PENDING)
 	{
