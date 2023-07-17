@@ -25,7 +25,7 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 	strcpy(baseFileName, archiveFileName);
 
 	auto len = strlen(baseFileName);
-	for (int i = 0; i < len; i++)
+	for (unsigned int i = 0; i < len; i++)
 	{
 		if (baseFileName[i] == '.')
 		{
@@ -66,7 +66,7 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 	m_pHash++;
 
 	auto offset = 0ULL;
-	for (int i = 0; i < m_numRecords; i++)
+	for (unsigned int i = 0; i < m_numRecords; i++)
 	{
 		auto record = m_pRecord[i];
 
@@ -79,7 +79,7 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 	m_numArchives = (offset + 0x95FFFFF) / ARCHIVE_ALIGNMENT;
 	m_pArchiveFiles = (cdc::File**)malloc(sizeof(cdc::File*) * m_numArchives);
 
-	for (int i = 0; i < m_numArchives; i++)
+	for (unsigned int i = 0; i < m_numArchives; i++)
 	{
 		strcpy(tmpFileName, baseFileName);
 		sprintf(extension, ".%03d", i);
@@ -103,7 +103,7 @@ ArchiveRecord* ArchiveFileSystem::Find(const char* fileName)
 	auto hash = CalculateHash(fileName);
 
 	// TODO replace with orginal game binary search algorithm
-	for (int i = 0; i < m_numRecords; i++)
+	for (unsigned int i = 0; i < m_numRecords; i++)
 	{
 		auto record = &m_pRecord[i];
 
