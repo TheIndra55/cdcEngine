@@ -29,6 +29,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	InitFS();
 	TIMER_Init();
 	InitArchive();
+	SetupBuildDir("PC-W");
 
 	return 0;
 }

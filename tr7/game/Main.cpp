@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "Main.h"
 
@@ -8,9 +10,13 @@
 #include "cdc/runtime/cdcFile/FileReceivers.h"
 
 #include "game/archive/ArchiveFileSystem.h"
+#include "game/pc/snd/MultiplexStream.h"
 
 cdc::FileSystem* g_pDiskFS;
 cdc::FileSystem* g_pFS;
+
+static char ActiveBuildName[16];
+static char ActiveBuildDir[32];
 
 void InitFS()
 {
@@ -30,6 +36,22 @@ void InitArchive()
 	{
 		cdc::FatalError("Unable to open bigfile BIGFILE.DAT!");
 	}
+}
+
+void SetupBuildDir(const char* configName)
+{
+	strcpy(ActiveBuildName, configName);
+	sprintf(ActiveBuildDir, "%s\\", configName);
+
+	char streamdir[256];
+	char cinstreamdir[256];
+
+	sprintf(streamdir, "%ssndstrm\\", ActiveBuildDir);
+	sprintf(cinstreamdir, "%s", ActiveBuildDir);
+
+	MultiplexStream::StopAllStreams();
+	MultiplexStream::SetSoundDirectory(streamdir);
+	MultiplexStream::SetCinematicDirectory(cinstreamdir);
 }
 
 char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS)
