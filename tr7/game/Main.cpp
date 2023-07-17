@@ -18,6 +18,11 @@ cdc::FileSystem* g_pFS;
 static char ActiveBuildName[16];
 static char ActiveBuildDir[32];
 
+cdc::FileSystem* GetFS()
+{
+	return g_pFS;
+}
+
 void InitFS()
 {
 	auto fileSystem = new cdc::MSFileSystem("");

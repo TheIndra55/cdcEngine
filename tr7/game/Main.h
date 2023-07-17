@@ -2,6 +2,8 @@
 
 #include "cdc/runtime/cdcFile/FileSystem.h"
 
+cdc::FileSystem* GetFS();
+
 void InitFS();
 void InitArchive();
 
