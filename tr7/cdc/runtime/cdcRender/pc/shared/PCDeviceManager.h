@@ -26,7 +26,11 @@ namespace cdc
 		{
 			unsigned int ordinal;
 			char name[512];
+			D3DADAPTER_IDENTIFIER9 d3dAdapterId;
 		};
+
+		PCInternalResource* m_pFirstResource;
+		PCInternalResource* m_pLastResource;
 
 		IDirect3D9* m_pD3D;
 

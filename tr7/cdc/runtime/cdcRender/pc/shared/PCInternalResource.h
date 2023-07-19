@@ -4,11 +4,10 @@ namespace cdc
 {
 	class PCInternalResource
 	{
-	private:
+	public:
 		PCInternalResource* m_pPrev;
 		PCInternalResource* m_pNext;
 
-	public:
 		PCInternalResource();
 
 		void OnConstruct();

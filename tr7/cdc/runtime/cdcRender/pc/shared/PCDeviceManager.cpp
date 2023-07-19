@@ -5,7 +5,8 @@ typedef IDirect3D9*(WINAPI* LPDIRECT3DCCREATE9)(UINT);
 cdc::PCDeviceManager* cdc::PCDeviceManager::s_pInstance;
 
 cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
-	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized)
+	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
+	  m_pFirstResource(nullptr), m_pLastResource(nullptr)
 {
 	m_pD3D = pD3D;
 
@@ -14,6 +15,18 @@ cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 
 void cdc::PCDeviceManager::AddDeviceResource(PCInternalResource* resource)
 {
+	if (!m_pFirstResource)
+	{
+		resource->m_pPrev = nullptr;
+		m_pFirstResource = resource;
+	}
+	else
+	{
+		resource->m_pPrev = m_pLastResource;
+		m_pLastResource->m_pNext = resource;
+	}
+
+	m_pLastResource = resource;
 }
 
 void cdc::PCDeviceManager::PostConstructorInit()
@@ -29,6 +42,22 @@ void cdc::PCDeviceManager::EnumAdaptersAndModes(bool force16Bit)
 
 	for (unsigned int i = 0; i < adapterCount; i++)
 	{
+		AdapterInfo adapterInfo = {};
+
+		m_pD3D->GetAdapterIdentifier(i, 0, &adapterInfo.d3dAdapterId);
+
+		adapterInfo.ordinal = i;
+
+		if (adapterCount > 1)
+		{
+			sprintf_s(adapterInfo.name, "%s (%d)", adapterInfo.d3dAdapterId.Description, i + 1);
+		}
+		else
+		{
+			sprintf_s(adapterInfo.name, "%s", adapterInfo.d3dAdapterId.Description);
+		}
+
+		m_adapters.push_back(adapterInfo);
 	}
 }
 
@@ -46,7 +75,7 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
 		auto Direct3DCreate9 = (LPDIRECT3DCCREATE9)GetProcAddress(d3dLib, "Direct3DCreate9");
 
 		IDirect3D9* d3d9;
-		if (!Direct3DCreate9 || (d3d9 = Direct3DCreate9(D3D_SDK_VERSION)) != nullptr)
+		if (!Direct3DCreate9 || (d3d9 = Direct3DCreate9(D3D_SDK_VERSION)) == nullptr)
 		{
 			FreeLibrary(d3dLib);
 

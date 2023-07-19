@@ -2,6 +2,7 @@
 #include "PCDeviceManager.h"
 
 cdc::PCInternalResource::PCInternalResource()
+	: m_pPrev(nullptr), m_pNext(nullptr)
 {
 	PCDeviceManager::s_pInstance->AddDeviceResource(this);
 }

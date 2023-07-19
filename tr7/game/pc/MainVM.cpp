@@ -4,6 +4,7 @@
 #include "game/Save/MSSave.h"
 #include "game/local/localstr.h"
 #include "game/Main.h"
+#include "D3D/rnd_d3d.h"
 #include "gamewindow.h"
 #include "timer.h"
 #include "setup.h"
@@ -41,6 +42,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	localstr_set_language(language_default);
 
 	SETUP_LocalizeSetupDialog();
+
+	if (!D3D_PreInit())
+	{
+		auto text = localstr_get(18);
+		auto caption = localstr_get(17);
+
+		MessageBoxA(NULL, text, caption, MB_OK);
+
+		return 1;
+	}
 
 	return 0;
 }
