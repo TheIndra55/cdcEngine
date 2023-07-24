@@ -11,12 +11,18 @@
 
 #include "game/archive/ArchiveFileSystem.h"
 #include "game/pc/snd/MultiplexStream.h"
+#include "game/Stream/stream.h"
+#include "game/pc/D3D/RenderRA.h"
+
+MainTracker mainTrackerX;
 
 cdc::FileSystem* g_pDiskFS;
 cdc::FileSystem* g_pFS;
 
 char ActiveBuildName[16];
 char ActiveBuildDir[32];
+
+char startUnit[32];
 
 cdc::FileSystem* GetFS()
 {
@@ -41,6 +47,41 @@ void InitArchive()
 	{
 		cdc::FatalError("Unable to open bigfile BIGFILE.DAT!");
 	}
+}
+
+bool MainG2()
+{
+	mainTrackerX.attractMovieName = nullptr;
+	mainTrackerX.dontClearSave = false;
+
+	GAMELOOP_SystemInit();
+
+	SetupBuildDir("PC-W");
+
+	if (ProcessArgs((char*)startUnit, &gameTrackerX))
+	{
+		return false;
+	}
+
+	mainTrackerX.mainState = 0;
+	mainTrackerX.previousState = 0;
+	mainTrackerX.done = 0;
+	mainTrackerX.checkMemCardFull = false;
+	mainTrackerX.checkMemCardNoCard = false;
+	mainTrackerX.checkLevelComplete = false;
+
+	RenderG2_SetBGColor(0.f, 0.f, 0.f);
+	RenderG2_BeginScene(false);
+	RenderG2_EndScene(frameRate_DefaultLocked);
+
+	MAIN_DoMainInit();
+
+	return false;
+}
+
+void MAIN_DoMainInit()
+{
+	STREAM_Init();
 }
 
 void SetupBuildDir(const char* configName)
@@ -93,4 +134,9 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 	{
 		return 0;
 	}
+}
+
+bool ProcessArgs(char* baseAreaName, GameTracker* gameTracker)
+{
+	return false;
 }
