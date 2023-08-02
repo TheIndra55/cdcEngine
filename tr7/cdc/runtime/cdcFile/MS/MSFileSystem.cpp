@@ -172,7 +172,7 @@ bool cdc::MSFileSystem::ProcessBuffer(char* buffer, Request* request, bool isRea
 	auto bytes = 0;
 	if (isReading)
 	{
-		bytes = this->m_BytesInBuffer;
+		bytes = m_BytesInBuffer;
 		m_BufferOffset += bufferBytes;
 	}
 	else
@@ -306,23 +306,23 @@ void cdc::MSFileSystem::Update()
 
 			if (skipSize > 0x40000)
 			{
-				auto offset = this->m_FileOffset + skipSize;
-				this->m_FileOffset = offset;
+				auto offset = m_FileOffset + skipSize;
+				m_FileOffset = offset;
 
 				skipSize = offset & 0x7FF;
 				request->m_SkipSize = skipSize;
 
-				this->m_FileOffset = this->m_FileOffset - skipSize;
+				m_FileOffset = m_FileOffset - skipSize;
 
-				request->m_BytesRead += this->m_FileOffset - offset;
-				request->m_BytesProcessed += this->m_FileOffset - offset;
+				request->m_BytesRead += m_FileOffset - offset;
+				request->m_BytesProcessed += m_FileOffset - offset;
 			}
 
 			auto target = &buffer[m_BytesInBuffer + m_BufferOffset];
-			auto numReadBytes = 0x100000 - this->m_BytesInBuffer - this->m_BufferOffset;
+			auto numReadBytes = 0x100000 - m_BytesInBuffer - m_BufferOffset;
 
 			auto readSize = request->m_Size - request->m_BytesRead;
-			if (numReadBytes < readSize)
+			if (numReadBytes > readSize)
 			{
 				numReadBytes = readSize;
 			}
@@ -334,7 +334,7 @@ void cdc::MSFileSystem::Update()
 
 			numReadBytes = RoundToSectors(numReadBytes);
 
-			if (numReadBytes + this->m_BytesInBuffer > 0x100800)
+			if (numReadBytes + m_BytesInBuffer > 0x100800)
 			{
 				numReadBytes -= 0x800;
 			}
@@ -354,7 +354,7 @@ void cdc::MSFileSystem::Update()
 			if (m_FileSource->GetReadResult(request->m_FileHandle, &numBytesRead))
 			{
 				m_BytesInBuffer += numBytesRead;
-				m_FileOffset = numBytesRead + this->m_FileOffset;
+				m_FileOffset = numBytesRead + m_FileOffset;
 
 				request->m_BytesRead += numBytesRead;
 
