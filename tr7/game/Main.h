@@ -32,4 +32,8 @@ void MAIN_DoMainInit();
 void SetupBuildDir(const char* configName);
 
 char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS);
+
+void LOAD_ObjectFileName(char* name, char* object, char* extension);
+void LOAD_UnitFileName(char* name, char* unit, char* extension);
+
 bool ProcessArgs(char* baseAreaName, GameTracker* gameTracker);

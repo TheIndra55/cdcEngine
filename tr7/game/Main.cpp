@@ -27,6 +27,8 @@ char ActiveBuildDir[32];
 
 char startUnit[32];
 
+static ResolveObject* s_pShaderResources;
+
 cdc::FileSystem* GetFS()
 {
 	return g_pFS;
@@ -93,6 +95,16 @@ void MAIN_DoMainInit()
 
 	char shaderDRMName[256];
 	sprintf(shaderDRMName, "%s%s.drm", ActiveBuildDir, "shaders");
+
+	if (g_pFS->FileExists(shaderDRMName))
+	{
+		s_pShaderResources = Resolve::Load(shaderDRMName, nullptr, nullptr, nullptr, nullptr);
+	}
+
+	auto generalbank = STREAM_GetObjectTrackerByName("generalbank");
+	auto globalsoundinfo = STREAM_GetObjectTrackerByName("globalsoundinfo");
+
+	g_pFS->Synchronize();
 }
 
 void SetupBuildDir(const char* configName)
@@ -145,6 +157,16 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 	{
 		return 0;
 	}
+}
+
+void LOAD_ObjectFileName(char* name, char* object, char* extension)
+{
+	sprintf(name, "%s%s.%s", ActiveBuildDir, object, extension);
+}
+
+void LOAD_UnitFileName(char* name, char* unit, char* extension)
+{
+	sprintf(name, "%s%s.%s", ActiveBuildDir, unit, extension);
 }
 
 bool ProcessArgs(char* baseAreaName, GameTracker* gameTracker)
