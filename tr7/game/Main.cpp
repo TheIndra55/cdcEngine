@@ -13,6 +13,9 @@
 #include "game/pc/snd/MultiplexStream.h"
 #include "game/Stream/stream.h"
 #include "game/pc/D3D/RenderRA.h"
+#include "game/pc/vram.h"
+#include "game/Animation/anitracker.h"
+#include "game/sound/Sound.h"
 
 MainTracker mainTrackerX;
 
@@ -82,6 +85,14 @@ bool MainG2()
 void MAIN_DoMainInit()
 {
 	STREAM_Init();
+	VRAM_InitVramBlockCache();
+	ANITRACKER_Init();
+	SOUND_Init();
+
+	MultiplexStream::InitSystem();
+
+	char shaderDRMName[256];
+	sprintf(shaderDRMName, "%s%s.drm", ActiveBuildDir, "shaders");
 }
 
 void SetupBuildDir(const char* configName)

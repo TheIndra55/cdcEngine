@@ -4,6 +4,11 @@ void MultiplexStream::StopAllStreams()
 {
 }
 
+bool MultiplexStream::InitSystem()
+{
+	return false;
+}
+
 void MultiplexStream::SetSoundDirectory(const char* dir)
 {
 }
