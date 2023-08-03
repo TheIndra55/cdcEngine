@@ -104,7 +104,7 @@ int InsertGlobalObject(int id)
 	object->objectName = name;
 	object->objectStatus = 1;
 	object->objectID = id;
-	object->resolveObj = Resolve::Load(string, STREAM_LoadObjectReturn, object, nullptr, &object);
+	object->resolveObj = Resolve::Load(string, STREAM_LoadObjectReturn, object, nullptr, (void**)&object);
 	object->numInUse = 0;
 	object->numObjectsUsing = 0;
 
