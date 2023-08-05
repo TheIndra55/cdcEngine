@@ -2,4 +2,5 @@
 
 void cdc::FatalError(const char* format, ...)
 {
+	__debugbreak();
 }
