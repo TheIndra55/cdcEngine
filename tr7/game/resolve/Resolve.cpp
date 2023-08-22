@@ -457,7 +457,7 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 			auto section = &m_section[m_sectionIndex];
 			auto sectionType = ResolveSection::s_pSection[section->type];
 
-			sectionType->HandleResourceData(m_rtrID[m_sectionIndex], ptr, remain, section->size - m_bodyLen);
+			numRead = sectionType->HandleResourceData(m_rtrID[m_sectionIndex], ptr, remain, section->size - m_bodyLen);
 
 			auto left = m_bodyLen - numRead;
 			m_bodyLen = left;
