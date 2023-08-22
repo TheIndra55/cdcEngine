@@ -98,21 +98,33 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 
 			*m_rtrID = -1;
 
-			if (m_reload)
-			{
-				//
-			}
-
 			auto fileSystem = GetFS();
 			auto currentSpecMask = fileSystem->GetSpecialisationMask();
 
-			unsigned int mask = 0xFFFFFFFF;
+			DeltaMap* addList;
+			DeltaMap* removeList;
+
+			int numAdded = 0;
+			int numRemoved = 0;
+			DeltaMap* curSectionAddr = nullptr;
+
+			if (m_reload)
+			{
+				addList = new DeltaMap[m_numSections];
+				removeList = new DeltaMap[m_numSections];
+
+				curSectionAddr = addList;
+			}
+
+			unsigned int compositeMask = 0xFFFFFFFF;
+
 			int numEntries = 0;
+			int oldRecordIndex = 0;
 
 			for (int i = 0; i < m_numSections; i++)
 			{
 				auto section = &m_section[i];
-				mask &= section->specMask;
+				compositeMask &= section->specMask;
 
 				if ((currentSpecMask & section->specMask) == currentSpecMask)
 				{
@@ -120,16 +132,13 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 					{
 						if ((m_previousSpecMask & section->specMask) == m_previousSpecMask)
 						{
-							// TODO
+							oldRecordIndex++;
 						}
 						else
 						{
-							// TODO
+							curSectionAddr[numAdded].absolute = i;
+							curSectionAddr[numAdded++].relative = numEntries;
 						}
-					}
-					else
-					{
-						// TODO
 					}
 
 					m_rtrID[i] = -1;
@@ -146,17 +155,30 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 					{
 						if ((m_previousSpecMask & section->specMask) == m_previousSpecMask)
 						{
-							// TODO
-						}
-						else
-						{
-							// TODO
+							auto sectionType = ResolveSection::s_pSection[section->type];
+
+							if (sectionType->CanUpdate())
+							{
+								removeList[numRemoved].absolute = i;
+								removeList[numRemoved++].relative = oldRecordIndex;
+							}
+							else
+							{
+								auto entry = m_pPreviousRecord->m_pEntry[oldRecordIndex];
+
+								if (entry.sectionType != SECTION_EMPTY && entry.rtrID != -1)
+								{
+									ResolveSection::s_pSection[entry.sectionType]->ReleaseResource(entry.rtrID);
+								}
+							}
+
+							oldRecordIndex++;
 						}
 					}
 				}
 			}
 
-			m_pObject->m_compositeSpecMask = mask;
+			m_pObject->m_compositeSpecMask = compositeMask;
 
 			auto record = new SectionRecord();
 
@@ -164,41 +186,59 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 			record->m_pEntry = new SectionRecord::Entry[numEntries];
 
 			m_pReleaseRecord = record;
+			oldRecordIndex = 0;
+
+			auto v72 = 0;
 
 			for (int i = 0; i < m_numSections; i++)
 			{
 				auto section = &m_section[i];
 				auto rtr = &m_rtrID[i];
 
-				auto entry = &m_pReleaseRecord->m_pEntry[i];
+				auto v73 = *rtr;
 
 				if (*rtr == -1)
 				{
 					if (m_reload && (m_previousSpecMask & section->specMask) == m_previousSpecMask)
 					{
+						auto prevRtr = m_pPreviousRecord->m_pEntry[oldRecordIndex++].rtrID;
 
+						auto record = m_pReleaseRecord;
+						record->m_pEntry[v72].sectionType = section->type;
+						record->m_pEntry[v72++].rtrID = prevRtr;
+
+						section->skip = true;
 					}
 					else
 					{
-						bool skip;
-						*rtr = ResolveSection::s_pSection[section->type]->StartResource(section->id, section->versionID, section->size, &skip);
+						auto sectionType = ResolveSection::s_pSection[section->type];
+
+						bool skip = false;
+						m_rtrID[i] = sectionType->StartResource(section->id, section->versionID, section->size, &skip);
 
 						section->skip = skip;
 
-						entry->sectionType = section->type;
-						entry->rtrID = *rtr;
+						auto record = m_pReleaseRecord;
+						record->m_pEntry[v72].sectionType = section->type;
+						record->m_pEntry[v72++].rtrID = m_rtrID[i];
 					}
 				}
 				else
 				{
 					if ((currentSpecMask & section->specMask) == currentSpecMask)
 					{
-						entry->sectionType = section->type;
-						entry->rtrID = *rtr;
+						auto record = m_pReleaseRecord;
+						record->m_pEntry[v72].sectionType = section->type;
+						record->m_pEntry[v72++].rtrID = v73;
 					}
 					else
 					{
 						*rtr = -1;
+					}
+
+					if (m_reload && (m_previousSpecMask & section->specMask) == m_previousSpecMask)
+					{
+						oldRecordIndex++;
 					}
 				}
 			}
@@ -211,7 +251,10 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 
 			if (m_reload)
 			{
-
+				if (m_pPreviousRecord)
+				{
+					delete m_pPreviousRecord;
+				}
 			}
 			else if (m_retPointer)
 			{

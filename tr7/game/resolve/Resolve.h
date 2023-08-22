@@ -116,6 +116,12 @@ public:
 		RESOLVE_LOAD_END
 	};
 
+	struct DeltaMap
+	{
+		unsigned __int16 relative;
+		unsigned __int16 absolute;
+	};
+
 	ResolveObject* m_pObject;
 	SectionRecord* m_pReleaseRecord;
 
