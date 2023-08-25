@@ -16,8 +16,13 @@
 #include "game/pc/vram.h"
 #include "game/Animation/anitracker.h"
 #include "game/sound/Sound.h"
+#include "game/font.h"
+#include "game/debug.h"
 
 MainTracker mainTrackerX;
+
+GlobalInfo* globalInfo;
+GlobalSoundInfo* globalSoundInfo;
 
 cdc::FileSystem* g_pDiskFS;
 cdc::FileSystem* g_pFS;
@@ -81,6 +86,8 @@ bool MainG2()
 
 	MAIN_DoMainInit();
 
+	DEBUG_Init();
+
 	return false;
 }
 
@@ -105,6 +112,15 @@ void MAIN_DoMainInit()
 	auto globalsoundinfo = STREAM_GetObjectTrackerByName("globalsoundinfo");
 
 	g_pFS->Synchronize();
+
+	globalInfo = (GlobalInfo*)generalbank->object->data;
+	globalSoundInfo = (GlobalSoundInfo*)globalsoundinfo->object->data;
+
+	SOUND_CreateGroups(globalSoundInfo->soundGroup, globalSoundInfo->soundGroupCount);
+
+	Font::Init();
+
+	GAMELOOP_ClearGameTracker();
 }
 
 void SetupBuildDir(const char* configName)

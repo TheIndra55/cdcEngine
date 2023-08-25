@@ -3,6 +3,7 @@
 #include "cdc/runtime/cdcFile/FileSystem.h"
 
 #include "game/Gameloop.h"
+#include "game/sound/Sound.h"
 
 struct MainTracker
 {
@@ -16,6 +17,18 @@ struct MainTracker
 	bool checkMemCardNoCard;
 	bool checkMemCardFull;
 	bool checkLevelComplete;
+};
+
+struct GlobalInfo
+{
+};
+
+struct GlobalSoundInfo
+{
+	SoundEffects* soundEffects;
+
+	int soundGroupCount;
+	SoundGroup* soundGroup;
 };
 
 extern char ActiveBuildName[16];

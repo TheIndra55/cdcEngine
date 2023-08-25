@@ -15,4 +15,5 @@ struct ObjectList
 extern ObjectList* gObjectList;
 
 void OBTABLE_Init();
+void OBTABLE_ClearObjectReferences();
 int OBTABLE_GetObjectID(char* name);

@@ -20,6 +20,10 @@ struct StreamUnitList
 	UnitInfo unit[1];
 };
 
+struct Level
+{
+};
+
 struct ObjectDTPData
 {
 	struct ObjectHeader
@@ -145,6 +149,10 @@ struct ObjectTracker
 	char objectsUsing[13];
 	void* vramBlock;
 };
+
+#define MAX_OBJECTS 94
+
+extern ObjectTracker GlobalObjects[MAX_OBJECTS];
 
 void STREAM_Init();
 ObjectTracker* STREAM_GetObjectTrackerByName(char* name);

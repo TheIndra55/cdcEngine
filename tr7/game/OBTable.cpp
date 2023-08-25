@@ -97,6 +97,10 @@ void OBTABLE_Init()
 	}
 }
 
+void OBTABLE_ClearObjectReferences()
+{
+}
+
 int OBTABLE_GetObjectID(char* name)
 {
 	if (gObjectList->numObjects <= 0)

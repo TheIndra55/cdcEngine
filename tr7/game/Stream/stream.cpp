@@ -7,8 +7,6 @@
 #include "game/OBTable.h"
 #include "game/Main.h"
 
-#define MAX_OBJECTS 94
-
 StreamUnitList* gUnitList = nullptr;
 
 ObjectTracker GlobalObjects[MAX_OBJECTS];
