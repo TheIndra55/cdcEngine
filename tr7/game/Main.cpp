@@ -132,12 +132,7 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 		return 0;
 	}
 
-	auto buffer = (char*)malloc(size + 1);
-
-	if (!buffer)
-	{
-		return 0;
-	}
+	auto buffer = new char[size + 1];
 
 	auto receiver = new cdc::FileUserBufferReceiver();
 	receiver->m_pBuffer = buffer;

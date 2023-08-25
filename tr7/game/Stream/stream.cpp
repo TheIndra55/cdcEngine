@@ -70,6 +70,13 @@ ObjectTracker* STREAM_GetObjectTrackerByName(char* name)
 
 void STREAM_LoadObjectReturn(void* loadData, void* data, void* data2, ResolveObject* resolveObject)
 {
+	auto object = (Object*)loadData;
+
+	auto dtpData = object->objectDTPData;
+	if (dtpData && dtpData->OEDTemplateSelector)
+	{
+		object->data = dtpData->TuneDataPtr;
+	}
 }
 
 int InsertGlobalObject(int id)
@@ -104,7 +111,7 @@ int InsertGlobalObject(int id)
 	object->objectName = name;
 	object->objectStatus = 1;
 	object->objectID = id;
-	object->resolveObj = Resolve::Load(string, STREAM_LoadObjectReturn, object, nullptr, (void**)&object);
+	object->resolveObj = Resolve::Load(string, STREAM_LoadObjectReturn, object, nullptr, (void**)&object->object);
 	object->numInUse = 0;
 	object->numObjectsUsing = 0;
 
