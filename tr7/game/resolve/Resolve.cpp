@@ -276,7 +276,7 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 			numRead = 0;
 
 			int i;
-			for (i = 0; i < m_numSections; i++)
+			for (i = m_sectionIndex; i < m_numSections; i++)
 			{
 				auto section = &m_section[i];
 
@@ -352,6 +352,8 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 
 				break;
 			}
+
+			numRead = m_resolveLen;
 
 			memcpy(m_resolvePtr, ptr, m_resolveLen);
 
@@ -494,11 +496,11 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 
 							break;
 						case Relocation::RESOURCE_ID16:
-							cdc::FatalError("Not implemented");
+							*(__int16*)addr = (__int16)type->FindResourceA(relocation->typeSpecific);
 
 							break;
 						case Relocation::RESOURCE_POINTER:
-							cdc::FatalError("Not implemented");
+							*addr = (int)type->GetBasePointer(type->FindResourceA(*addr));
 
 							break;
 						}
@@ -506,6 +508,8 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 				}
 
 				sectionType->HandleResourceEnd(m_rtrID[m_sectionIndex], &m_section[m_sectionIndex]);
+
+				delete[] m_resolveList;
 
 				m_sectionIndex++;
 				m_resolveList = nullptr;
