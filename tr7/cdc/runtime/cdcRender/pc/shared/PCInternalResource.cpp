@@ -21,3 +21,8 @@ void cdc::PCInternalResource::OnDestruct()
 {
 	OnDestroyDevice();
 }
+
+void cdc::PCInternalResource::OnCreateResourceFailed()
+{
+	cdc::PCDeviceManager::s_pInstance->OnCreateResourceFailed();
+}

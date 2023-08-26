@@ -29,6 +29,8 @@ void cdcRenderLayer::BeginFrame()
 
 void cdcRenderLayer::EndFrame()
 {
+	s_cdcDev->SetFullScreenAlpha(0.f);
+	s_cdcDev->EndFrame();
 }
 
 void cdcRenderLayer::D3D_BeginScene()

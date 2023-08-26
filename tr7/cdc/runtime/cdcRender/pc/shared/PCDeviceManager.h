@@ -4,6 +4,7 @@
 #include <d3d9.h>
 
 #include "PCStateManager.h"
+#include "PCRenderContext.h"
 
 #include "cdc/runtime/cdcSys/Array.h"
 
@@ -65,15 +66,17 @@ namespace cdc
 		D3DDEVTYPE m_d3dDevType;
 		unsigned int m_d3dBehaviorFlags;
 
+		cdc::PCRenderContext* m_pCurrentContext;
+
 		int m_refCount;
 
 		Status m_status;
 
 		HWND m_hFocusWindow;
 
-	private:
-
 		PCStateManager* m_pStateManager;
+
+	private:
 
 		cdc::Array<cdc::PCDeviceManager::AdapterInfo> m_adapters;
 
@@ -84,9 +87,12 @@ namespace cdc
 
 		void ReleaseDevice(Status status);
 		bool CreateDevice(Settings* settings);
+		PCRenderContext* CreateRenderContext(HWND hwnd, unsigned int width, unsigned int height);
 
 		bool CreateAttachedResources();
 		void DestroyAttachedResources();
+
+		void OnCreateResourceFailed();
 
 		void AddDeviceResource(PCInternalResource* resource);
 		void PostConstructorInit();

@@ -8,7 +8,7 @@ cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
 	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0), m_settings(),
 	  m_d3dPresentParams(), m_d3dDevType(D3DDEVTYPE_HAL), m_d3dBehaviorFlags(0), m_d3dCaps(),
-	  m_isPixelShader20(false), m_isPixelShader30(false)
+	  m_isPixelShader20(false), m_isPixelShader30(false), m_pCurrentContext(nullptr)
 {
 	m_pD3D = pD3D;
 
@@ -145,6 +145,11 @@ bool cdc::PCDeviceManager::CreateDevice(Settings* settings)
 	CreateAttachedResources();
 }
 
+cdc::PCRenderContext* cdc::PCDeviceManager::CreateRenderContext(HWND hwnd, unsigned int width, unsigned int height)
+{
+	return new PCRenderContext(hwnd, width, height);
+}
+
 bool cdc::PCDeviceManager::CreateAttachedResources()
 {
 	m_bIsRecreatingResources = true;
@@ -168,6 +173,11 @@ void cdc::PCDeviceManager::DestroyAttachedResources()
 	{
 		resource->OnDestroyDevice();
 	}
+}
+
+void cdc::PCDeviceManager::OnCreateResourceFailed()
+{
+	ReleaseDevice(kStatusCreateResourceFailed);
 }
 
 void cdc::PCDeviceManager::AddDeviceResource(PCInternalResource* resource)
