@@ -37,6 +37,11 @@ bool D3D_Init()
 	return true;
 }
 
+DeviceCallback::DeviceCallback() : PCInternalResource()
+{
+	OnConstruct();
+}
+
 bool DeviceCallback::OnCreateDevice()
 {
 	if (!m_bInitialized)

@@ -8,6 +8,8 @@ private:
 	bool m_bInitialized = false;
 
 public:
+	DeviceCallback();
+
 	bool OnCreateDevice();
 	void OnDestroyDevice();
 };
