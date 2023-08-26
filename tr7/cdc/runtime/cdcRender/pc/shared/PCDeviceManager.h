@@ -29,16 +29,23 @@ namespace cdc
 			D3DADAPTER_IDENTIFIER9 d3dAdapterId;
 		};
 
+		class Settings
+		{
+		};
+
 		PCInternalResource* m_pFirstResource;
 		PCInternalResource* m_pLastResource;
 
 		IDirect3D9* m_pD3D;
+		IDirect3DDevice9* m_pD3DDevice;
 
 		bool m_bIsRecreatingResources;
 
 		int m_refCount;
 
 		Status m_status;
+
+		HWND m_hFocusWindow;
 
 	private:
 
@@ -48,6 +55,13 @@ namespace cdc
 
 	public:
 		PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D);
+
+		bool Init(HWND hFocusWindow, Settings* settings);
+
+		void ReleaseDevice(Status status);
+		bool CreateDevice(Settings* settings);
+
+		bool CreateAttachedResources();
 
 		void AddDeviceResource(PCInternalResource* resource);
 		void PostConstructorInit();

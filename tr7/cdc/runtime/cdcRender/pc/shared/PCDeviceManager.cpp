@@ -6,11 +6,88 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::s_pInstance;
 
 cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
-	  m_pFirstResource(nullptr), m_pLastResource(nullptr)
+	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0)
 {
 	m_pD3D = pD3D;
 
 	EnumAdaptersAndModes(false);
+}
+
+bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
+{
+	m_hFocusWindow = hFocusWindow;
+
+	if (/* settings && */ m_pD3DDevice)
+	{
+
+	}
+	else
+	{
+		if (m_pD3DDevice)
+		{
+			ReleaseDevice(kStatusNotInitialized);
+		}
+
+		if (CreateDevice(settings))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void cdc::PCDeviceManager::ReleaseDevice(Status status)
+{
+	m_status = status;
+
+	for (auto resource = m_pFirstResource; resource != nullptr; resource->m_pNext)
+	{
+		resource->OnDestroyDevice();
+	}
+
+	if (m_pD3DDevice)
+	{
+		m_pD3DDevice->Release();
+		m_pD3DDevice = nullptr;
+	}
+}
+
+bool cdc::PCDeviceManager::CreateDevice(Settings* settings)
+{
+	if (!m_pD3D)
+	{
+		m_status = kStatusCreateDeviceFailed;
+		return false;
+	}
+
+	m_status = kStatusNotInitialized;
+
+	if (m_status != kStatusNotInitialized)
+	{
+		return false;
+	}
+
+	m_status = kStatusOk;
+
+	CreateAttachedResources();
+}
+
+bool cdc::PCDeviceManager::CreateAttachedResources()
+{
+	m_bIsRecreatingResources = true;
+
+	for (auto resource = m_pFirstResource; resource != nullptr; resource->m_pNext)
+	{
+		if (!resource->OnCreateDevice())
+		{
+			m_bIsRecreatingResources = false;
+			return false;
+		}
+	}
+
+	m_bIsRecreatingResources = false;
+	return true;
 }
 
 void cdc::PCDeviceManager::AddDeviceResource(PCInternalResource* resource)

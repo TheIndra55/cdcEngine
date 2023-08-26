@@ -1,5 +1,17 @@
 #pragma once
 
+#include "cdc/runtime/cdcRender/pc/shared/PCInternalResource.h"
+
+class DeviceCallback : public cdc::PCInternalResource
+{
+private:
+	bool m_bInitialized = false;
+
+public:
+	bool OnCreateDevice();
+	void OnDestroyDevice();
+};
+
 extern bool D3D_HasISSE;
 extern bool D3D_HasMMX;
 
