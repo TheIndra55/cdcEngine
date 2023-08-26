@@ -99,6 +99,9 @@ bool MainG2()
 	while (true)
 	{
 		MainG2_UpdateLoop();
+
+		RenderG2_BeginScene(true);
+		RenderG2_EndScene(frameRate_DefaultLocked);
 	}
 
 	return false;

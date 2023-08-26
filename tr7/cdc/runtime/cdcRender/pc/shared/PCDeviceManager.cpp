@@ -7,7 +7,8 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::s_pInstance;
 cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
 	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0), m_settings(),
-	  m_d3dPresentParams(), m_d3dDevType(D3DDEVTYPE_HAL), m_d3dBehaviorFlags(0), m_d3dCaps()
+	  m_d3dPresentParams(), m_d3dDevType(D3DDEVTYPE_HAL), m_d3dBehaviorFlags(0), m_d3dCaps(),
+	  m_isPixelShader20(false), m_isPixelShader30(false)
 {
 	m_pD3D = pD3D;
 
@@ -25,6 +26,7 @@ bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
 
 	if (memcmp(&m_settings, settings, sizeof(Settings)) == 0 && m_pD3DDevice)
 	{
+		SettingsChanged();
 		DestroyAttachedResources();
 		CreateAttachedResources();
 
@@ -55,6 +57,10 @@ bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
 	}
 
 	return false;
+}
+
+void cdc::PCDeviceManager::Destroy()
+{
 }
 
 void cdc::PCDeviceManager::ReleaseDevice(Status status)
@@ -126,6 +132,8 @@ bool cdc::PCDeviceManager::CreateDevice(Settings* settings)
 		m_status = kStatusCreateResourceFailed;
 		return false;
 	}
+
+	SettingsChanged();
 
 	if (m_status != kStatusNotInitialized)
 	{
@@ -285,6 +293,12 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
 	s_pInstance->m_refCount++;
 
 	return s_pInstance;
+}
+
+void cdc::PCDeviceManager::SettingsChanged()
+{
+	m_isPixelShader30 = true;
+	m_isPixelShader20 = true;
 }
 
 bool cdc::PCDeviceManager::GetAdapterRect(unsigned int adapterId, RECT* rect)

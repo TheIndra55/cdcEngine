@@ -5,6 +5,7 @@ HWND gGameHwnd;
 HWND gForegroundHwnd;
 
 cdc::PCDeviceManager::Settings settings;
+GameWindowStatus gGameWindowStatus;
 
 bool GAMEWINDOW_Poll()
 {
@@ -16,6 +17,14 @@ bool GAMEWINDOW_Poll()
 	}
 
 	return true;
+}
+
+void GAMEWINDOW_SetDefaults()
+{
+	memset(&gGameWindowStatus, 0, sizeof(GameWindowStatus));
+
+	gGameWindowStatus.screenWidth = 800;
+	gGameWindowStatus.screenHeight = 800;
 }
 
 bool GAMEWINDOW_ReadSettings()

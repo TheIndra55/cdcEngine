@@ -17,5 +17,9 @@ public:
 extern bool D3D_HasISSE;
 extern bool D3D_HasMMX;
 
+extern bool D3D_InNextGenMode;
+
 bool D3D_PreInit();
 bool D3D_Init();
+void D3D_BeginScene(bool enableReflection);
+void D3D_EndScene();

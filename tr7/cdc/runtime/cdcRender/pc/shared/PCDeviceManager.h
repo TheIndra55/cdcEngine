@@ -58,6 +58,9 @@ namespace cdc
 		bool m_bIsRecreatingResources;
 		Settings m_settings;
 
+		bool m_isPixelShader20;
+		bool m_isPixelShader30;
+
 		D3DPRESENT_PARAMETERS m_d3dPresentParams;
 		D3DDEVTYPE m_d3dDevType;
 		unsigned int m_d3dBehaviorFlags;
@@ -90,10 +93,12 @@ namespace cdc
 		void EnumAdaptersAndModes(bool force16Bit);
 		void SelectAdapterDisplayFormat(AdapterInfo* adapterInfo, bool force16Bit);
 		void SelectAdapterMultiSampleType(AdapterInfo* adapterInfo);
+		void SettingsChanged();
 		bool GetAdapterRect(unsigned int adapterId, RECT* rect);
 		bool ValidateSettings(Settings* settings);
 
 		static PCDeviceManager* s_pInstance;
 		static PCDeviceManager* Create();
+		static void Destroy();
 	};
 }
