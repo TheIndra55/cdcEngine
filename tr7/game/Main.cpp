@@ -18,6 +18,7 @@
 #include "game/sound/Sound.h"
 #include "game/font.h"
 #include "game/debug.h"
+#include "game/pc/gamewindow.h"
 
 MainTracker mainTrackerX;
 
@@ -59,6 +60,13 @@ void InitArchive()
 	}
 }
 
+bool MainG2_UpdateLoop()
+{
+	GAMEWINDOW_Poll();
+
+	return false;
+}
+
 bool MainG2()
 {
 	mainTrackerX.attractMovieName = nullptr;
@@ -87,6 +95,11 @@ bool MainG2()
 	MAIN_DoMainInit();
 
 	DEBUG_Init();
+
+	while (true)
+	{
+		MainG2_UpdateLoop();
+	}
 
 	return false;
 }

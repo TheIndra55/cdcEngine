@@ -27,10 +27,25 @@ namespace cdc
 			unsigned int ordinal;
 			char name[512];
 			D3DADAPTER_IDENTIFIER9 d3dAdapterId;
+
+			_D3DFORMAT displayFormat;
+			_D3DFORMAT backBufferFormat;
+
+			unsigned int maxMultiSampleQuality;
 		};
 
 		class Settings
 		{
+		public:
+			unsigned int adapterId;
+
+			unsigned int fullscreenModeId;
+			bool fullscreen;
+
+			bool enableVSync;
+			bool enableFSAA;
+
+			Settings();
 		};
 
 		PCInternalResource* m_pFirstResource;
@@ -38,8 +53,14 @@ namespace cdc
 
 		IDirect3D9* m_pD3D;
 		IDirect3DDevice9* m_pD3DDevice;
+		D3DCAPS9 m_d3dCaps;
 
 		bool m_bIsRecreatingResources;
+		Settings m_settings;
+
+		D3DPRESENT_PARAMETERS m_d3dPresentParams;
+		D3DDEVTYPE m_d3dDevType;
+		unsigned int m_d3dBehaviorFlags;
 
 		int m_refCount;
 
@@ -62,11 +83,15 @@ namespace cdc
 		bool CreateDevice(Settings* settings);
 
 		bool CreateAttachedResources();
+		void DestroyAttachedResources();
 
 		void AddDeviceResource(PCInternalResource* resource);
 		void PostConstructorInit();
 		void EnumAdaptersAndModes(bool force16Bit);
+		void SelectAdapterDisplayFormat(AdapterInfo* adapterInfo, bool force16Bit);
+		void SelectAdapterMultiSampleType(AdapterInfo* adapterInfo);
 		bool GetAdapterRect(unsigned int adapterId, RECT* rect);
+		bool ValidateSettings(Settings* settings);
 
 		static PCDeviceManager* s_pInstance;
 		static PCDeviceManager* Create();

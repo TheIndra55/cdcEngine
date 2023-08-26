@@ -25,7 +25,7 @@ bool D3D_PreInit()
 
 bool D3D_Init()
 {
-	if (!cdc::PCDeviceManager::s_pInstance->Init(gGameHwnd, nullptr))
+	if (!cdc::PCDeviceManager::s_pInstance->Init(gGameHwnd, &settings))
 	{
 		return false;
 	}

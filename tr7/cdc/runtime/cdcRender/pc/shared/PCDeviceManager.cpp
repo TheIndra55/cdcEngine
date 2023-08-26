@@ -6,7 +6,8 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::s_pInstance;
 
 cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
-	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0)
+	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0), m_settings(),
+	  m_d3dPresentParams(), m_d3dDevType(D3DDEVTYPE_HAL), m_d3dBehaviorFlags(0), m_d3dCaps()
 {
 	m_pD3D = pD3D;
 
@@ -17,9 +18,28 @@ bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
 {
 	m_hFocusWindow = hFocusWindow;
 
-	if (/* settings && */ m_pD3DDevice)
+	if (!ValidateSettings(settings))
 	{
+		return false;
+	}
 
+	if (memcmp(&m_settings, settings, sizeof(Settings)) == 0 && m_pD3DDevice)
+	{
+		DestroyAttachedResources();
+		CreateAttachedResources();
+
+		if (m_status == kStatusOk)
+		{
+			return true;
+		}
+
+		ReleaseDevice(kStatusNotInitialized);
+		CreateDevice(settings);
+
+		if (m_status == kStatusOk)
+		{
+			return true;
+		}
 	}
 	else
 	{
@@ -41,7 +61,7 @@ void cdc::PCDeviceManager::ReleaseDevice(Status status)
 {
 	m_status = status;
 
-	for (auto resource = m_pFirstResource; resource != nullptr; resource->m_pNext)
+	for (auto resource = m_pFirstResource; resource != nullptr; resource = resource->m_pNext)
 	{
 		resource->OnDestroyDevice();
 	}
@@ -63,6 +83,50 @@ bool cdc::PCDeviceManager::CreateDevice(Settings* settings)
 
 	m_status = kStatusNotInitialized;
 
+	if (settings->adapterId >= m_adapters.size())
+	{
+		m_status = kStatusInvalidSettings;
+		return false;
+	}
+
+	auto adapter = m_adapters.at(settings->adapterId);
+
+	memset(&m_d3dPresentParams, 0, sizeof(D3DPRESENT_PARAMETERS));
+	m_d3dPresentParams.hDeviceWindow = NULL;
+	m_d3dPresentParams.Flags = 0;
+	m_d3dPresentParams.PresentationInterval = settings->enableVSync ? D3DPRESENT_INTERVAL_DEFAULT : D3DPRESENT_INTERVAL_IMMEDIATE;
+	m_d3dPresentParams.MultiSampleType = settings->enableFSAA ? D3DMULTISAMPLE_NONE : D3DMULTISAMPLE_NONMASKABLE;
+	m_d3dPresentParams.MultiSampleQuality = settings->enableFSAA ? adapter.maxMultiSampleQuality : 0;
+	m_d3dPresentParams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
+	if (settings->fullscreen)
+	{
+		// TODO
+	}
+	else
+	{
+		m_d3dPresentParams.Windowed = TRUE;
+		m_d3dPresentParams.BackBufferWidth = 2;
+		m_d3dPresentParams.BackBufferHeight = 2;
+		m_d3dPresentParams.BackBufferFormat = adapter.backBufferFormat;
+		m_d3dPresentParams.BackBufferCount = 1;
+		m_d3dPresentParams.EnableAutoDepthStencil = FALSE;
+		m_d3dPresentParams.AutoDepthStencilFormat = D3DFMT_UNKNOWN;
+	}
+
+	if (FAILED(m_pD3D->GetDeviceCaps(adapter.ordinal, m_d3dDevType, &m_d3dCaps)))
+	{
+		return false;
+	}
+
+	m_d3dBehaviorFlags = D3DCREATE_HARDWARE_VERTEXPROCESSING;
+
+	if (FAILED(m_pD3D->CreateDevice(adapter.ordinal, m_d3dDevType, m_hFocusWindow, m_d3dBehaviorFlags, &m_d3dPresentParams, &m_pD3DDevice)))
+	{
+		m_status = kStatusCreateResourceFailed;
+		return false;
+	}
+
 	if (m_status != kStatusNotInitialized)
 	{
 		return false;
@@ -77,7 +141,7 @@ bool cdc::PCDeviceManager::CreateAttachedResources()
 {
 	m_bIsRecreatingResources = true;
 
-	for (auto resource = m_pFirstResource; resource != nullptr; resource->m_pNext)
+	for (auto resource = m_pFirstResource; resource != nullptr; resource = resource->m_pNext)
 	{
 		if (!resource->OnCreateDevice())
 		{
@@ -88,6 +152,14 @@ bool cdc::PCDeviceManager::CreateAttachedResources()
 
 	m_bIsRecreatingResources = false;
 	return true;
+}
+
+void cdc::PCDeviceManager::DestroyAttachedResources()
+{
+	for (auto resource = m_pFirstResource; resource != nullptr; resource = resource->m_pNext)
+	{
+		resource->OnDestroyDevice();
+	}
 }
 
 void cdc::PCDeviceManager::AddDeviceResource(PCInternalResource* resource)
@@ -125,6 +197,9 @@ void cdc::PCDeviceManager::EnumAdaptersAndModes(bool force16Bit)
 
 		adapterInfo.ordinal = i;
 
+		SelectAdapterDisplayFormat(&adapterInfo, force16Bit);
+		SelectAdapterMultiSampleType(&adapterInfo);
+
 		if (adapterCount > 1)
 		{
 			sprintf_s(adapterInfo.name, "%s (%d)", adapterInfo.d3dAdapterId.Description, i + 1);
@@ -136,6 +211,37 @@ void cdc::PCDeviceManager::EnumAdaptersAndModes(bool force16Bit)
 
 		m_adapters.push_back(adapterInfo);
 	}
+}
+
+void cdc::PCDeviceManager::SelectAdapterDisplayFormat(AdapterInfo* adapterInfo, bool force16Bit)
+{
+	if (m_pD3D)
+	{
+		if (SUCCEEDED(m_pD3D->CheckDeviceFormat(adapterInfo->ordinal, m_d3dDevType, D3DFMT_X8R8G8B8, D3DUSAGE_RENDERTARGET, D3DRTYPE_SURFACE, D3DFMT_A8R8G8B8)) || force16Bit)
+		{
+			adapterInfo->displayFormat = D3DFMT_X8R8G8B8;
+			adapterInfo->backBufferFormat = D3DFMT_A8R8G8B8;
+
+			return;
+		}
+
+		if (SUCCEEDED(m_pD3D->CheckDeviceFormat(adapterInfo->ordinal, m_d3dDevType, D3DFMT_R5G6B5, D3DUSAGE_RENDERTARGET, D3DRTYPE_SURFACE, D3DFMT_R5G6B5)))
+		{
+			adapterInfo->displayFormat = D3DFMT_R5G6B5;
+			adapterInfo->backBufferFormat = D3DFMT_R5G6B5;
+
+			return;
+		}
+	}
+
+	adapterInfo->displayFormat = D3DFMT_UNKNOWN;
+	adapterInfo->backBufferFormat = D3DFMT_UNKNOWN;
+}
+
+void cdc::PCDeviceManager::SelectAdapterMultiSampleType(AdapterInfo* adapterInfo)
+{
+	// TODO
+	adapterInfo->maxMultiSampleQuality = 3;
 }
 
 cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
@@ -184,4 +290,18 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
 bool cdc::PCDeviceManager::GetAdapterRect(unsigned int adapterId, RECT* rect)
 {
 	return false;
+}
+
+bool cdc::PCDeviceManager::ValidateSettings(Settings* settings)
+{
+	return true;
+}
+
+cdc::PCDeviceManager::Settings::Settings()
+{
+	adapterId = 0;
+	fullscreenModeId = 0;
+	fullscreen = false;
+	enableVSync = false;
+	enableFSAA = false;
 }

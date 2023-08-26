@@ -1,10 +1,22 @@
-#include <Windows.h>
-
-#include "cdc/runtime/cdcRender/pc/shared/PCDeviceManager.h"
+#include "gamewindow.h"
 
 HWND gInputHwnd;
 HWND gGameHwnd;
 HWND gForegroundHwnd;
+
+cdc::PCDeviceManager::Settings settings;
+
+bool GAMEWINDOW_Poll()
+{
+	MSG msg;
+	while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return true;
+}
 
 bool GAMEWINDOW_ReadSettings()
 {
@@ -41,7 +53,7 @@ void GAMEWINDOW_Init()
 
 	RegisterClass(&WndClass);
 
-	if (false /* fullscreen */)
+	if (settings.fullscreen)
 	{
 		RECT rect;
 		cdc::PCDeviceManager::s_pInstance->GetAdapterRect(0 /* adapterId */, &rect);
