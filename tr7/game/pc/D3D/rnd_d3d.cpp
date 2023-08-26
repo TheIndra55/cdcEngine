@@ -17,3 +17,7 @@ bool D3D_PreInit()
 
 	return cdc::PCDeviceManager::Create() != nullptr;
 }
+
+bool D3D_Init()
+{
+}

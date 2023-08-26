@@ -52,6 +52,7 @@ namespace cdc
 		void AddDeviceResource(PCInternalResource* resource);
 		void PostConstructorInit();
 		void EnumAdaptersAndModes(bool force16Bit);
+		bool GetAdapterRect(unsigned int adapterId, RECT* rect);
 
 		static PCDeviceManager* s_pInstance;
 		static PCDeviceManager* Create();

@@ -53,6 +53,29 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 		return 1;
 	}
 
+	if (!D3D_HasISSE)
+	{
+		auto text = localstr_get(44);
+		auto caption = localstr_get(17);
+
+		MessageBoxA(NULL, text, caption, MB_OK);
+
+		return 1;
+	}
+
+	if (!D3D_HasMMX)
+	{
+		auto text = localstr_get(28);
+		auto caption = localstr_get(17);
+
+		MessageBoxA(NULL, text, caption, MB_OK);
+
+		return 1;
+	}
+
+	GAMEWINDOW_Init();
+	D3D_Init();
+
 	MainG2();
 
 	return 0;

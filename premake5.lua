@@ -12,6 +12,8 @@ project "tr7"
         "tr7/**/*.c"
     }
 
+    characterset "ASCII"
+
     includedirs { "tr7" }
     
     symbols "On"

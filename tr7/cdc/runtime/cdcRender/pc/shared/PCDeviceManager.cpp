@@ -103,3 +103,8 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
 
 	return s_pInstance;
 }
+
+bool cdc::PCDeviceManager::GetAdapterRect(unsigned int adapterId, RECT* rect)
+{
+	return false;
+}
