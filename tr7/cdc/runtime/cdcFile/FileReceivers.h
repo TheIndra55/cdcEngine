@@ -7,7 +7,7 @@ namespace cdc
 	class FileUserBufferReceiver : public cdc::FileReceiver
 	{
 	public:
-		char* m_pBuffer;
+		char* m_pBuffer = nullptr;
 
 		int ReceiveData(const char* data, unsigned int dataSize, unsigned int requestOffset);
 		void ReceiveStarted(FileRequest* request, unsigned int requestSize);

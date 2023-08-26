@@ -19,6 +19,10 @@ LRESULT CALLBACK RegularWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 {
 	switch (uMsg)
 	{
+	case WM_CLOSE:
+		PostQuitMessage(0);
+		break;
+
 	default:
 		return DefWindowProc(hwnd, uMsg, wParam, lParam);
 	}

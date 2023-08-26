@@ -13,7 +13,7 @@ HANDLE hMainThread;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
 {
-	strlwr(lpCmdLine);
+	_strlwr(lpCmdLine);
 
 	DuplicateHandle(GetCurrentProcess(), GetCurrentThread(), GetCurrentProcess(), &hMainThread, 0, FALSE, DUPLICATE_SAME_ACCESS);
 	SetThreadAffinityMask(GetCurrentThread(), 1);

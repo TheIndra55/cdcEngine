@@ -20,4 +20,5 @@ bool D3D_PreInit()
 
 bool D3D_Init()
 {
+	return false;
 }

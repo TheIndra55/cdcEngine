@@ -13,6 +13,7 @@ project "tr7"
     }
 
     characterset "ASCII"
+    defines { "_CRT_SECURE_NO_WARNINGS" }
 
     includedirs { "tr7" }
     

@@ -121,7 +121,7 @@ unsigned int ArchiveFileSystem::CalculateHash(const char* fileName)
 	char lowerCaseString[256];
 
 	strcpy(lowerCaseString, fileName);
-	strlwr(lowerCaseString);
+	_strlwr(lowerCaseString);
 
 	return ComputeCRC(strlen(lowerCaseString), lowerCaseString);
 }
