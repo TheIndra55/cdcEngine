@@ -118,8 +118,6 @@ namespace cdc
 	class PCRenderModel : public RenderMesh
 	{
 	private:
-		PCModelData* m_pHeader;
-
 		unsigned __int16 m_numPrimGroups;
 		PCPrimGroup* m_pPrimGroups;
 
@@ -136,6 +134,8 @@ namespace cdc
 		void BuildStencilData();
 
 	public:
+		PCModelData* m_pHeader;
+
 		PCRenderModel(PCModelData* pRenderMeshData, TextureMap** pTextures, IShaderLib** pShaders, RenderMesh* pRefMesh, PCRenderDevice* pRenderDevice);
 	};
 
@@ -148,6 +148,12 @@ namespace cdc
 
 	class PCRenderModelInstance : public RenderModelInstance
 	{
+	private:
+		cdc::PCRenderModel* m_pRenderModel;
+
+		cdc::Vector3 m_center;
+		float m_radius;
+
 	public:
 		PCRenderModelInstance(PCRenderModel* pRenderModel, PCRenderDevice* pRenderDevice);
 	};

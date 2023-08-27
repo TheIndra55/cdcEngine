@@ -112,4 +112,7 @@ void cdc::PCRenderModel::BuildStencilData()
 
 cdc::PCRenderModelInstance::PCRenderModelInstance(PCRenderModel* pRenderModel, PCRenderDevice* pRenderDevice)
 {
+	m_pRenderModel = pRenderModel;
+	m_center = pRenderModel->m_pHeader->boundingSphereCenter;
+	m_radius = pRenderModel->m_pHeader->boundingSphereRadius;
 }

@@ -11,6 +11,7 @@
 #include "cdc/runtime/cdcRender/pc/PCShaderLib.h"
 
 static cdc::PCRenderDevice* s_cdcDev;
+static cdc::RenderViewport s_curViewport;
 
 struct TextureList
 {
@@ -107,6 +108,7 @@ void cdcRenderLayer::RenderReflectionBuffer()
 
 void cdcRenderLayer::BeginFrame()
 {
+	s_cdcDev->BeginFrame();
 }
 
 void cdcRenderLayer::EndFrame()
@@ -117,10 +119,12 @@ void cdcRenderLayer::EndFrame()
 
 void cdcRenderLayer::D3D_BeginScene()
 {
+	s_cdcDev->BeginScene(&s_curViewport);
 }
 
 void cdcRenderLayer::D3D_EndScene()
 {
+	s_cdcDev->EndScene();
 }
 
 bool cdcRenderLayer::Create(HWND hWnd)

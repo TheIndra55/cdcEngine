@@ -60,6 +60,14 @@ bool cdc::PCRenderDevice::EndFrame()
 	return true;
 }
 
+bool cdc::PCRenderDevice::BeginScene(RenderViewport* pViewport)
+{
+}
+
+bool cdc::PCRenderDevice::EndScene()
+{
+}
+
 cdc::RenderMesh* cdc::PCRenderDevice::CreateRenderModel(void* renderModelData, TextureMap** pcTextures, IShaderLib** shaderLibs, RenderMesh* pcRefData)
 {
 	return new PCRenderModel((PCModelData*)renderModelData, pcTextures, shaderLibs, pcRefData, this);

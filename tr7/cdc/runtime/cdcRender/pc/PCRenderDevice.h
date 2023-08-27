@@ -12,11 +12,17 @@ namespace cdc
 	class RenderMesh;
 	class RenderModelInstance;
 
+	class RenderViewport
+	{
+	};
+
 	class RenderDevice
 	{
 	public:
 		virtual bool BeginFrame() = 0;
 		virtual bool EndFrame() = 0;
+		virtual bool BeginScene(RenderViewport* pViewport) = 0;
+		virtual bool EndScene() = 0;
 		virtual void SetFullScreenAlpha(float alpha) = 0;
 
 		static RenderDevice* s_pcInstance;
@@ -38,6 +44,9 @@ namespace cdc
 
 		bool BeginFrame();
 		bool EndFrame();
+
+		bool BeginScene(RenderViewport* pViewport);
+		bool EndScene();
 
 		RenderMesh* CreateRenderModel(void* renderModelData, TextureMap** pcTextures, IShaderLib** shaderLibs, RenderMesh* pcRefData);
 		RenderModelInstance* CreateRenderModelInstance(RenderMesh* renderMesh);
