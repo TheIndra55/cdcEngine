@@ -271,9 +271,9 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 		}
 		case RESOLVE_LOAD_SECTION_CHOICE:
 		{
-			m_state = RESOLVE_LOAD_SECTION_RELOCS_LENGTH;
-
 			numRead = 0;
+
+			m_state = RESOLVE_LOAD_SECTION_RELOCS_LENGTH;
 
 			int i;
 			for (i = m_sectionIndex; i < m_numSections; i++)
@@ -311,6 +311,8 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 			return dataSize + numRead - remaining;
 		}
 		case RESOLVE_LOAD_SECTION_RELOCS_LENGTH:
+			numRead = 0;
+
 			m_resolveLen = m_section[m_sectionIndex].packed.numRelocations;
 			m_state = RESOLVE_LOAD_SECTION_RELOCS;
 
@@ -336,6 +338,8 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 					m_resolveList = nullptr;
 				}
 			}
+
+			numRead = remaining;
 
 			if (m_resolveLen > remaining)
 			{
@@ -413,6 +417,8 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 				break;
 			}
 
+			numRead = m_resolveLen;
+
 			m_state = RESOLVE_LOAD_SECTION_SKIP_BODY;
 			m_bodyLen = m_section[m_sectionIndex].size;
 
@@ -477,13 +483,16 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 						auto relocation = &m_resolveList->relocation[i];
 
 						auto info = relocation->typeAndSectionInfo;
-						auto type = ResolveSection::s_pSection[info.type];
 						auto addr = (int*)((int)curSectionAddr + relocation->offset);
+
+						ResolveSection* type = nullptr;
 
 						switch ((Relocation::Type)relocation->typeAndSectionInfo.type)
 						{
 						case Relocation::POINTER:
 						{
+							type = ResolveSection::s_pSection[m_section[info.sectionIndexOrType].type];
+
 							auto offset = *addr;
 							auto base = (int)type->GetBasePointer(m_rtrID[info.sectionIndexOrType]);
 
@@ -492,14 +501,20 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 
 						break;
 						case Relocation::RESOURCE_ID:
+							type = ResolveSection::s_pSection[info.type];
+
 							*addr = type->FindResourceA(info.sectionIndexOrType);
 
 							break;
 						case Relocation::RESOURCE_ID16:
+							type = ResolveSection::s_pSection[info.type];
+
 							*(__int16*)addr = (__int16)type->FindResourceA(relocation->typeSpecific);
 
 							break;
 						case Relocation::RESOURCE_POINTER:
+							type = ResolveSection::s_pSection[info.type];
+
 							*addr = (int)type->GetBasePointer(type->FindResourceA(*addr));
 
 							break;
@@ -523,20 +538,23 @@ int ResolveReceiver::ReceiveData(const char* data, unsigned int dataSize, unsign
 					m_resolvePtr = nullptr;
 					m_state = RESOLVE_LOAD_SECTION_CHOICE;
 				}
-
-				if (remaining == numRead)
-					return dataSize;
-
-				remaining -= numRead;
-				ptr = (char*)(ptr + numRead);
-
-				break;
 			}
+
+			if (remaining == numRead)
+				return dataSize;
+
+			remaining -= numRead;
+			ptr = (char*)(ptr + numRead);
+
+			break;
 		}
 		case RESOLVE_LOAD_SECTION_SKIP_BODY:
+			numRead = remaining;
+
 			if (m_bodyLen <= remaining)
 			{
 				m_sectionIndex++;
+				numRead = m_bodyLen;
 
 				if (m_sectionIndex > m_numSections)
 				{

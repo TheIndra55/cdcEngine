@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "ResolveSection.h"
+#include "DTPDataSection.h"
 
 ResolveSection* ResolveSection::s_pSection[10];
 
@@ -11,6 +12,8 @@ void ResolveSection::Init()
 	{
 		s_pSection[i] = new GenericSection();
 	}
+
+	s_pSection[7] = new DTPDataSection();
 }
 
 unsigned int GenericSection::StartResource(unsigned int rtrID, unsigned __int16 versionID, unsigned int size, bool* skip)
