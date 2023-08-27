@@ -5,10 +5,13 @@
 #include "game/Stream/stream.h"
 
 #include "cdc/runtime/cdcRender/pc/PCRenderDevice.h"
+#include "cdc/runtime/cdcScene/Source/Scene.h"
 
 class cdcRenderLayer
 {
 public:
+	static cdc::IScene* s_pGlobalScene;
+
 	static cdc::PCRenderDevice* GetPCRD(); 
 
 	static void DRAW_PrepareObjectForDraw(Object* object);
