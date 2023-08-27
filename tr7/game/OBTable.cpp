@@ -6,6 +6,14 @@
 
 ObjectList* gObjectList;
 
+void OBTABLE_InitObjectWithID(Object* object)
+{
+}
+
+void OBTABLE_InitAnimPointers(ObjectTracker* objectTracker)
+{
+}
+
 inline char* getline(char* str, char* text)
 {
 	if (*text != '\n')

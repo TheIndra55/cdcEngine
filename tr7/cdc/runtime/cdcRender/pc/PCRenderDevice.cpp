@@ -1,4 +1,7 @@
 #include "PCRenderDevice.h"
+#include "PCRenderModel.h"
+#include "PCShaderLib.h"
+#include "PCTexture.h"
 
 #include "cdc/runtime/cdcRender/pc/shared/PCDeviceManager.h"
 
@@ -55,6 +58,16 @@ bool cdc::PCRenderDevice::EndFrame()
 	}
 
 	return true;
+}
+
+cdc::RenderMesh* cdc::PCRenderDevice::CreateRenderModel(void* renderModelData, TextureMap** pcTextures, IShaderLib** shaderLibs, RenderMesh* pcRefData)
+{
+	return new PCRenderModel((PCModelData*)renderModelData, pcTextures, shaderLibs, pcRefData, this);
+}
+
+cdc::RenderModelInstance* cdc::PCRenderDevice::CreateRenderModelInstance(RenderMesh* renderMesh)
+{
+	return new PCRenderModelInstance((cdc::PCRenderModel*)renderMesh, this);
 }
 
 void cdc::PCRenderDevice::SetFullScreenAlpha(float alpha)

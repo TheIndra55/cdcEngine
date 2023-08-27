@@ -14,3 +14,11 @@ void D3DINSTANCE_Init()
 		}
 	}
 }
+
+void DRAW_PrepareObjectForDraw(Object* object)
+{
+	if (D3D_InNextGenMode)
+	{
+		cdcRenderLayer::DRAW_PrepareObjectForDraw(object);
+	}
+}

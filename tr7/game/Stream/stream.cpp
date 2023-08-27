@@ -6,6 +6,7 @@
 
 #include "game/OBTable.h"
 #include "game/Main.h"
+#include "game/pc/D3D/d3dinstance.h"
 
 StreamUnitList* gUnitList = nullptr;
 
@@ -69,12 +70,52 @@ ObjectTracker* STREAM_GetObjectTrackerByName(char* name)
 void STREAM_LoadObjectReturn(void* loadData, void* data, void* data2, ResolveObject* resolveObject)
 {
 	auto object = (Object*)loadData;
+	auto tracker = (ObjectTracker*)data;
 
 	auto dtpData = object->objectDTPData;
 	if (dtpData && dtpData->OEDTemplateSelector)
 	{
 		object->data = dtpData->TuneDataPtr;
 	}
+
+	tracker->objectStatus = 2;
+
+	for (int i = 0; i < object->numModels; i++)
+	{
+		if (!object->modelList[i])
+		{
+			cdc::FatalError("FATAL ERROR: object '%s' is missing model '%d' (out of %d models)!", tracker->objectName, i, object->numModels);
+			return;
+		}
+
+		auto version = object->modelList[i]->version;
+
+		if (version != 0x4C20453)
+		{
+			cdc::FatalError("FATAL ERROR: model version (%X) for object '%s' does not match the game version (%X)!", version, tracker->objectName, 0x4C20453);
+			return;
+		}
+	}
+
+	if (object->lod1Model == -1)
+	{
+		object->oflags &= 0xFFDFFFFF;
+	}
+	else
+	{
+		object->oflags |= 0x200000;
+	}
+
+	OBTABLE_InitObjectWithID(object);
+
+	if (object->animList)
+	{
+		ANITRACKER_TranslateAnimationList(object->animList);
+	}
+
+	OBTABLE_InitAnimPointers(tracker);
+
+	DRAW_PrepareObjectForDraw(object);
 }
 
 int InsertGlobalObject(int id)

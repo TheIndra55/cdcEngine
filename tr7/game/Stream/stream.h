@@ -1,6 +1,9 @@
 #pragma once
 
 #include "game/resolve/Resolve.h"
+#include "game/Animation/anitracker.h"
+
+#include "cdc/runtime/cdcMath/Vector.h"
 
 struct StreamUnitObjectList
 {
@@ -43,13 +46,102 @@ struct ObjectDTPData
 	ObjectDTPData::ObjectHeader Header;
 };
 
-struct Model
+struct Segment
 {
 };
 
-struct AnimListEntry
+struct MVertex
 {
 };
+
+struct MFace
+{
+};
+
+struct AnimatedListInfo
+{
+};
+
+struct AnimatedInfo
+{
+};
+
+struct ScrollInfo
+{
+};
+
+struct TextureStripInfo
+{
+};
+
+struct BoneMirrorData
+{
+};
+
+struct SVector
+{
+};
+
+struct MarkUp
+{
+};
+
+struct ModelTarget
+{
+};
+
+struct Model
+{
+	int version;
+	int numSegments;
+	int numVirtSegments;
+
+	Segment* segmentList;
+	cdc::Vector3 modelScale;
+	int numVertices;
+	MVertex* vertexList;
+	int numNormals;
+	cdc::Vector3* normalList;
+	int numFaces;
+	MFace* faceList;
+
+	void* OBSOLETEaniTextures;
+
+	float maxRad;
+	float maxRadSq;
+
+	void* OBSOLETEstartTextures;
+	void* OBSOLETEendTextures;
+
+	AnimatedListInfo* animatedListInfo;
+	AnimatedInfo* animatedInfo;
+	ScrollInfo* scrollInfo;
+
+	TextureStripInfo* textureStripInfo;
+
+	int* envMappedVertices;
+	int* eyeRefEnvMappedVertices;
+
+	unsigned int* materialVertexColors;
+	unsigned int* spectralVertexColors;
+
+	__int16* pnShadowFaces;
+	__int16* pnShadowEdges;
+
+	BoneMirrorData* boneMirrorData;
+	SVector* drawgroupCenterList;
+
+	int numMarkUps;
+	MarkUp* markUpList;
+
+	int numTargets;
+	ModelTarget* targetList;
+
+	unsigned int cdcRenderDataID;
+	void* cdcRenderModelData;
+};
+
+static_assert(sizeof(Model) == 160, "Wrong Model size");
 
 struct AnimFxHeader
 {

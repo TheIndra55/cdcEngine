@@ -1,10 +1,17 @@
 #pragma once
 
+#include "PCShaderLib.h"
+#include "PCTexture.h"
+
 #include "shared/PCInternalResource.h"
 #include "shared/PCRenderContext.h"
+#include "shared/PCStaticPool.h"
 
 namespace cdc
 {
+	class RenderMesh;
+	class RenderModelInstance;
+
 	class RenderDevice
 	{
 	public:
@@ -25,10 +32,16 @@ namespace cdc
 		PCRenderContext* m_pDefaultContext;
 
 	public:
+		PCStaticPool* m_pStaticPool;
+
 		PCRenderDevice(void* hwnd, unsigned int width, unsigned int height, bool effectsEnabled);
 
 		bool BeginFrame();
 		bool EndFrame();
+
+		RenderMesh* CreateRenderModel(void* renderModelData, TextureMap** pcTextures, IShaderLib** shaderLibs, RenderMesh* pcRefData);
+		RenderModelInstance* CreateRenderModelInstance(RenderMesh* renderMesh);
+
 		void SetFullScreenAlpha(float alpha);
 
 		void ResolveDeferredReleases();
