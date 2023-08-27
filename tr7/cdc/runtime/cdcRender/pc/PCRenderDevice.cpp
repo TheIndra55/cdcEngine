@@ -11,6 +11,7 @@ cdc::PCRenderDevice::PCRenderDevice(void* hwnd, unsigned int width, unsigned int
 	m_isFrameFailed = false;
 
 	m_pDefaultContext = cdc::PCDeviceManager::s_pInstance->CreateRenderContext((HWND)hwnd, width, height);
+	m_pStaticPool = new PCStaticPool(0x7FFF80, 0x400000, false);
 
 	OnConstruct();
 }
