@@ -1,7 +1,16 @@
 #pragma once
 
+#include "game/List.h"
+#include "game/Stream/stream.h"
+
 struct BaseInstance
 {
+	NodeType node;
+	Instance* next;
+	Instance* prev;
+
+	Object* object;
+	char currentRenderModel;
 };
 
 struct Instance : BaseInstance

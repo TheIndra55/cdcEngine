@@ -1,7 +1,7 @@
 #include "PCRenderModel.h"
 #include "PCRenderDevice.h"
 
-#include <cdc/runtime/cdcSys/Assert.h>
+#include "cdc/runtime/cdcSys/Assert.h"
 
 void cdc::RenderModelInstance::Release()
 {
@@ -115,4 +115,8 @@ cdc::PCRenderModelInstance::PCRenderModelInstance(PCRenderModel* pRenderModel, P
 	m_pRenderModel = pRenderModel;
 	m_center = pRenderModel->m_pHeader->boundingSphereCenter;
 	m_radius = pRenderModel->m_pHeader->boundingSphereRadius;
+}
+
+void cdc::PCRenderModelInstance::Draw(cdc::Matrix* pRootMatrix)
+{
 }

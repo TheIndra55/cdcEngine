@@ -9,6 +9,7 @@
 
 #include "cdc/runtime/cdcRender/RenderResource.h"
 #include "cdc/runtime/cdcMath/Vector.h"
+#include "cdc/runtime/cdcMath/Matrix.h"
 
 namespace cdc
 {
@@ -111,6 +112,7 @@ namespace cdc
 
 	class RenderMesh : public RenderResource
 	{
+	public:
 		void Release();
 		int GetMemorySize();
 	};
@@ -144,6 +146,8 @@ namespace cdc
 	public:
 		void Release();
 		int GetMemorySize();
+
+		virtual void Draw(cdc::Matrix* pRootMatrix);
 	};
 
 	class PCRenderModelInstance : public RenderModelInstance
@@ -156,5 +160,7 @@ namespace cdc
 
 	public:
 		PCRenderModelInstance(PCRenderModel* pRenderModel, PCRenderDevice* pRenderDevice);
+
+		void Draw(cdc::Matrix* pRootMatrix);
 	};
 }
