@@ -5,6 +5,8 @@
 
 namespace cdc
 {
+	class Scene;
+
 	class ISceneEntity
 	{
 		virtual void SetMatrix(cdc::Matrix* matrix) = 0;

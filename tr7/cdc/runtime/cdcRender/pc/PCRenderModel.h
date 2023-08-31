@@ -147,7 +147,7 @@ namespace cdc
 		void Release();
 		int GetMemorySize();
 
-		virtual void Draw(cdc::Matrix* pRootMatrix);
+		virtual void Draw(cdc::Matrix* pRootMatrix) = 0;
 	};
 
 	class PCRenderModelInstance : public RenderModelInstance

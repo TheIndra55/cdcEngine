@@ -6,12 +6,18 @@ cdc::PCStaticVertexBuffer::PCStaticVertexBuffer(PCStaticPool* pStaticPool) : PCI
 	m_numVertices = 0;
 	m_stride = 0;
 	m_baseVertIndex = 0;
-	m_pVertexData = nullptr;;
+	m_pVertexData = nullptr;
 	m_ownsData = false;
 }
 
 void cdc::PCStaticVertexBuffer::Create(void* pVertexData, D3DVERTEXELEMENT9* pVertexElements, unsigned int stride, unsigned int numVertices)
 {
+	m_pVertexFormat = PCVertexFormat::Create(pVertexElements);
+	m_numVertices = numVertices;
+	m_stride = stride;
+	m_pVertexData = pVertexData;
+	m_ownsData = false;
+
 	OnConstruct();
 }
 
@@ -27,7 +33,7 @@ IDirect3DVertexBuffer9* cdc::PCStaticVertexBuffer::GetD3DVertexBuffer()
 
 IDirect3DVertexDeclaration9* cdc::PCStaticVertexBuffer::GetD3DVertexDeclaration()
 {
-	return nullptr;
+	return m_pVertexFormat->m_pD3DVertexDeclaration;
 }
 
 unsigned int cdc::PCStaticVertexBuffer::GetNumVertices()

@@ -3,6 +3,8 @@
 #include "game/List.h"
 #include "game/Stream/stream.h"
 
+struct Instance;
+
 struct BaseInstance
 {
 	NodeType node;

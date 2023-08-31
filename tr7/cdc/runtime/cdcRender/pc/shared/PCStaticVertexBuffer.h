@@ -3,6 +3,7 @@
 #include "PCVertexBuffer.h"
 #include "PCInternalResource.h"
 #include "PCStaticPool.h"
+#include "PCVertexFormat.h"
 
 namespace cdc
 {
@@ -16,6 +17,7 @@ namespace cdc
 		unsigned int m_stride;
 		unsigned int m_baseVertIndex;
 		void* m_pVertexData;
+		PCVertexFormat* m_pVertexFormat;
 		bool m_ownsData;
 
 	public:
