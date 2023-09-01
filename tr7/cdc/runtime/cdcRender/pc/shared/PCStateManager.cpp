@@ -1,7 +1,7 @@
 #include "PCStateManager.h"
 #include "PCDeviceManager.h"
 
-cdc::PCStateManager::PCStateManager() : PCInternalResource()
+cdc::PCStateManager::PCStateManager() : PCInternalResource(), m_renderStates{}
 {
 	m_pD3DDevice = nullptr;
 	m_bInScene = false;
@@ -11,6 +11,15 @@ cdc::PCStateManager::PCStateManager() : PCInternalResource()
 	m_vertexStride = 0;
 
 	OnConstruct();
+}
+
+void cdc::PCStateManager::SetRenderState(D3DRENDERSTATETYPE state, unsigned int value)
+{
+	if (m_renderStates[state] != value)
+	{
+		m_pD3DDevice->SetRenderState(state, value);
+		m_renderStates[state] = value;
+	}
 }
 
 void cdc::PCStateManager::SetIndexBuffer(PCIndexBuffer* pNewIndexBuffer)
@@ -63,6 +72,40 @@ void cdc::PCStateManager::SetVertexBuffer(PCVertexBuffer* pVertexBuffer, IDirect
 
 		m_pVertexBuffer = newBuffer;
 		m_vertexStride = newStride;
+	}
+}
+
+void cdc::PCStateManager::SetPixelShader(PCPixelShader* pPixelShader)
+{
+	if (pPixelShader != m_pPixelShader)
+	{
+		if (pPixelShader)
+		{
+			m_pD3DDevice->SetPixelShader(pPixelShader->m_pD3DPixelShader);
+			m_pPixelShader = pPixelShader;
+		}
+		else
+		{
+			m_pD3DDevice->SetPixelShader(NULL);
+			m_pPixelShader = nullptr;
+		}
+	}
+}
+
+void cdc::PCStateManager::SetVertexShader(PCVertexShader* pVertexShader)
+{
+	if (pVertexShader != m_pVertexShader)
+	{
+		if (pVertexShader)
+		{
+			m_pD3DDevice->SetVertexShader(pVertexShader->m_pD3DVertexShader);
+			pVertexShader = pVertexShader;
+		}
+		else
+		{
+			m_pD3DDevice->SetVertexShader(NULL);
+			pVertexShader = nullptr;
+		}
 	}
 }
 
