@@ -23,14 +23,17 @@ cdc::PCShaderBinary::PCShaderBinary(unsigned int* pData, bool copyData)
 		memcpy(data, pData, sizeof(unsigned int) * i);
 	}
 
-	if (pData[0] == 0xBAADF00D && pData[1] == 0xDEADBABE)
-	{
-		m_pId = (cdc::PCShaderId*)data;
-		m_pFunction = data + 4;
-	}
-	else
-	{
-		//m_pId = 
-		m_pFunction = data;
-	}
+	//if (pData[0] == 0xBAADF00D && pData[1] == 0xDEADBABE)
+	//{
+	//	m_pId = (cdc::PCShaderId*)data;
+	//	m_pFunction = data + 4;
+	//}
+	//else
+	//{
+	//	m_pId = 
+	//	m_pFunction = data;
+	//}
+
+	// TODO
+	m_pFunction = pData;
 }

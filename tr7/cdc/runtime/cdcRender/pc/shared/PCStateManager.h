@@ -9,6 +9,8 @@
 #include "PCPixelShader.h"
 #include "PCVertexShader.h"
 
+#include "cdc/runtime/cdcMath/Matrix.h"
+
 namespace cdc
 {
 	class PCStateManager : public PCInternalResource
@@ -35,6 +37,10 @@ namespace cdc
 
 		void SetPixelShader(PCPixelShader* pPixelShader);
 		void SetVertexShader(PCVertexShader* pVertexShader);
+
+		void SetPixelConstants(unsigned int index, const float* data, unsigned int count);
+		void SetVertexConstants(unsigned __int16 index, const float* data, unsigned __int16 count);
+		void SetVertexConstantMatrix4x4(unsigned __int16 index, Matrix* m);
 
 		bool OnCreateDevice();
 		void OnDestroyDevice();

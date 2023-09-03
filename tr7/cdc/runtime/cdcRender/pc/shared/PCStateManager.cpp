@@ -9,6 +9,8 @@ cdc::PCStateManager::PCStateManager() : PCInternalResource(), m_renderStates{}
 	m_pVertexBuffer = nullptr;
 	m_pVertexDeclaration = nullptr;
 	m_vertexStride = 0;
+	m_pPixelShader = nullptr;
+	m_pVertexShader = nullptr;
 
 	OnConstruct();
 }
@@ -107,6 +109,40 @@ void cdc::PCStateManager::SetVertexShader(PCVertexShader* pVertexShader)
 			pVertexShader = nullptr;
 		}
 	}
+}
+
+void cdc::PCStateManager::SetPixelConstants(unsigned int index, const float* data, unsigned int count)
+{
+	m_pD3DDevice->SetPixelShaderConstantF(index, data, count);
+}
+
+void cdc::PCStateManager::SetVertexConstants(unsigned __int16 index, const float* data, unsigned __int16 count)
+{
+	m_pD3DDevice->SetPixelShaderConstantF(index, data, count);
+}
+
+void cdc::PCStateManager::SetVertexConstantMatrix4x4(unsigned __int16 index, Matrix* m)
+{
+	float data[16];
+
+	data[0]  = m->col0.x;
+	data[1]  = m->col1.x;
+	data[2]  = m->col2.x;
+	data[3]  = m->col3.x;
+	data[4]  = m->col0.y;
+	data[5]  = m->col1.y;
+	data[6]  = m->col2.y;
+	data[7]  = m->col3.y;
+	data[8]  = m->col0.z;
+	data[9]  = m->col1.z;
+	data[10] = m->col2.z;
+	data[11] = m->col3.z;
+	data[12] = m->col0.w;
+	data[13] = m->col1.w;
+	data[14] = m->col2.w;
+	data[15] = m->col3.w;
+
+	SetVertexConstants(index, data, 4);
 }
 
 bool cdc::PCStateManager::OnCreateDevice()

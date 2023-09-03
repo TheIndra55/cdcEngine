@@ -23,6 +23,8 @@ namespace cdc
 	private:
 		int m_VBufferSize;
 		int m_IBufferSize;
+
+	public:
 		bool m_is32BitsIndex;
 
 		cdc::Array<IDirect3DVertexBuffer9*> m_vertexBuffers;

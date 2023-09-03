@@ -326,6 +326,6 @@ cdc::PCDeviceManager::Settings::Settings()
 	adapterId = 0;
 	fullscreenModeId = 0;
 	fullscreen = false;
-	enableVSync = false;
+	enableVSync = true;
 	enableFSAA = false;
 }

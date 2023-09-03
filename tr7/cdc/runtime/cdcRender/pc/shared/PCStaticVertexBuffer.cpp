@@ -50,6 +50,13 @@ bool cdc::PCStaticVertexBuffer::OnCreateDevice()
 {
 	m_pStaticPool->AllocVertices(&m_allocation, m_stride, m_numVertices);
 
+	auto buffer = m_allocation.m_buffer;
+	void* pVertexData;
+
+	buffer->Lock(m_allocation.m_offset, m_allocation.m_size, &pVertexData, 0);
+	memcpy(pVertexData, m_pVertexData, m_numVertices * m_stride);
+	buffer->Unlock();
+
 	return true;
 }
 

@@ -31,6 +31,20 @@ bool cdc::PCStaticIndexBuffer::OnCreateDevice()
 {
 	m_pStaticPool->AllocIndices(&m_allocation, m_numIndices);
 
+	if (m_pStaticPool->m_is32BitsIndex)
+	{
+		 // TODO
+	}
+	else
+	{
+		auto buffer = m_allocation.m_buffer;
+		void* pIndexData;
+
+		buffer->Lock(m_allocation.m_offset, m_allocation.m_size, &pIndexData, 0);
+		memcpy(pIndexData, m_pIndexData, m_numIndices * 2);
+		buffer->Unlock();
+	}
+
 	return true;
 }
 

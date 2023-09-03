@@ -6,6 +6,7 @@ namespace cdc
 {
 	class Vector
 	{
+	public:
 		union
 		{
 			__m128 vec128;
