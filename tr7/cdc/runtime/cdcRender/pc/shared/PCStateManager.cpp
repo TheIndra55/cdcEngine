@@ -118,7 +118,7 @@ void cdc::PCStateManager::SetPixelConstants(unsigned int index, const float* dat
 
 void cdc::PCStateManager::SetVertexConstants(unsigned __int16 index, const float* data, unsigned __int16 count)
 {
-	m_pD3DDevice->SetPixelShaderConstantF(index, data, count);
+	m_pD3DDevice->SetVertexShaderConstantF(index, data, count);
 }
 
 void cdc::PCStateManager::SetVertexConstantMatrix4x4(unsigned __int16 index, Matrix* m)
