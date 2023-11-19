@@ -60,22 +60,9 @@ int DTPDataSection::HandleResourceData(unsigned int rtrID, const char* pData, un
 	return dataSize;
 }
 
-void DTPDataSection::HandleResourceEnd(unsigned int rtrID, SectionInfo* info)
-{
-}
-
-void DTPDataSection::HandleResourceCancel(unsigned int rtrID)
-{
-}
-
 void DTPDataSection::HandleResourceReady(unsigned int rtrID, SectionInfo* info)
 {
 	m_dtpDataInstances[rtrID]->m_isStreaming = false;
-}
-
-bool DTPDataSection::CanUpdate()
-{
-	return false;
 }
 
 void* DTPDataSection::GetBasePointer(unsigned int resourceID)
