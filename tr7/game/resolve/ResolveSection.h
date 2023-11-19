@@ -5,7 +5,7 @@
 class ResolveSection
 {
 public:
-	static ResolveSection* s_pSection[10];
+	static ResolveSection* s_pSection[NUM_SECTION_TYPES];
 	static void Init();
 
 	virtual unsigned int StartResource(unsigned int rtrID, unsigned __int16 versionID, unsigned int size, bool* skip) = 0;
