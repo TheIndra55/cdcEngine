@@ -42,3 +42,17 @@ public:
 	void Update();
 	void Synchronize();
 };
+
+class ArchiveFile : public cdc::File
+{
+private:
+	ArchiveRecord* m_pRecord;
+	cdc::File* m_pArchiveFile;
+	unsigned int m_offsetInArchive;
+
+public:
+	ArchiveFile(ArchiveRecord* record, cdc::File* archiveFile, unsigned int offsetInArchive);
+
+	cdc::FileRequest* RequestRead(cdc::FileReceiver* receiver, const char* fileName, unsigned int startOffset);
+	unsigned int GetSize();
+};

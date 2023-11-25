@@ -49,9 +49,9 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 	m_pDiskFS->Synchronize();
 
 	// Read filename hashes and file records
-	auto size = 20 * m_numRecords;
+	auto size = (sizeof(ArchiveRecord) + sizeof(unsigned int)) * m_numRecords;
 
-	m_pHash = (unsigned int*)malloc(size + 4);
+	m_pHash = (unsigned int*)new char[size + 4];
 
 	receiver->m_pBuffer = (char*)m_pHash;
 	request = m_pDiskFS->RequestRead(receiver, tmpFileName, 0);
@@ -72,12 +72,12 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 
 		if ((unsigned __int64)record.offset << 11 > offset)
 		{
-			offset =  (unsigned __int64)record.offset << 11;
+			offset = (unsigned __int64)record.offset << 11;
 		}
 	}
 
 	m_numArchives = (offset + 0x95FFFFF) / ARCHIVE_ALIGNMENT;
-	m_pArchiveFiles = (cdc::File**)malloc(sizeof(cdc::File*) * m_numArchives);
+	m_pArchiveFiles = new cdc::File*[m_numArchives];
 
 	for (unsigned int i = 0; i < m_numArchives; i++)
 	{
@@ -102,7 +102,7 @@ ArchiveRecord* ArchiveFileSystem::Find(const char* fileName)
 {
 	auto hash = CalculateHash(fileName);
 
-	// TODO replace with orginal game binary search algorithm
+	// TODO replace with original game binary search algorithm
 	for (unsigned int i = 0; i < m_numRecords; i++)
 	{
 		auto record = &m_pRecord[i];
@@ -132,7 +132,7 @@ cdc::FileRequest* ArchiveFileSystem::RequestRead(cdc::FileReceiver* receiver, co
 
 	if (!record)
 	{
-		cdc::FatalError("Can't open file\n", fileName);
+		cdc::FatalError("Can't open file %s\n", fileName);
 	}
 
 	auto offset = (unsigned __int64)record->offset << 11;
@@ -148,12 +148,22 @@ cdc::FileRequest* ArchiveFileSystem::RequestRead(cdc::FileReceiver* receiver, co
 
 cdc::File* ArchiveFileSystem::OpenFile(const char* fileName)
 {
-	return nullptr;
+	auto record = Find(fileName);
+
+	if (!record)
+	{
+		return nullptr;
+	}
+
+	auto offset = (unsigned __int64)record->offset << 11;
+	auto file = m_pArchiveFiles[offset / ARCHIVE_ALIGNMENT];
+
+	return new ArchiveFile(record, file, offset % ARCHIVE_ALIGNMENT);
 }
 
 bool ArchiveFileSystem::FileExists(const char* fileName)
 {
-	return Find(fileName) != 0;
+	return Find(fileName) != nullptr;
 }
 
 unsigned int ArchiveFileSystem::GetFileSize(const char* fileName)
@@ -216,4 +226,21 @@ unsigned int ComputeCRC(int size, const void* rawData)
 	}
 
 	return ~hash;
+}
+
+ArchiveFile::ArchiveFile(ArchiveRecord* record, cdc::File* archiveFile, unsigned int offsetInArchive)
+{
+	m_pRecord = record;
+	m_pArchiveFile = archiveFile;
+	m_offsetInArchive = offsetInArchive;
+}
+
+cdc::FileRequest* ArchiveFile::RequestRead(cdc::FileReceiver* receiver, const char* fileName, unsigned int startOffset)
+{
+	return m_pArchiveFile->RequestRead(receiver, fileName, m_offsetInArchive + startOffset);
+}
+
+unsigned int ArchiveFile::GetSize()
+{
+	return m_pRecord->size;
 }
