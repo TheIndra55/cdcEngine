@@ -36,6 +36,10 @@ void GAMEWINDOW_ReadIngameSettings()
 {
 }
 
+void GAMEWINDOW_ApplyInGameSettings()
+{
+}
+
 LRESULT CALLBACK RegularWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)

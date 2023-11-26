@@ -6,6 +6,7 @@
 #include "game/sound/Sound.h"
 #include "game/menu/UIFadeGroup.h"
 #include "game/GameDifficulty.h"
+#include "game/menu/UIScreen.h"
 
 struct MainTracker
 {
@@ -19,6 +20,36 @@ struct MainTracker
 	bool checkMemCardNoCard;
 	bool checkMemCardFull;
 	bool checkLevelComplete;
+};
+
+enum InterfaceItemIds
+{
+	NVIDIA_SCREEN = 0,
+	TITLE_SCREEN = 1,
+	LEGAL_SCREEN = 2,
+	MOVIE_CREDITS = 3,
+	OUT1_SCREEN = 4,
+	OUT2_SCREEN = 5,
+	MOVIE_EPILOGUE = 6,
+	NUM_INTERFACE_ITEMS = 7,
+};
+
+enum InterfaceItemTypes
+{
+	IFACE_ITEM_MOVIE = 0,
+	IFACE_ITEM_SCREEN = 1,
+};
+
+struct InterfaceItem
+{
+	char name[48];
+	unsigned __int16 timeout;
+	unsigned __int16 buttonTimeout;
+	__int16 itemType;
+	__int16 nextItem;
+	float fadeUpSpeed;
+	float fadeDownSpeed;
+	UIScreenID pushScreenID;
 };
 
 struct PlayerObjects

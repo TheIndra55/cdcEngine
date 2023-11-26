@@ -20,5 +20,6 @@ extern GameWindowStatus gGameWindowStatus;
 bool GAMEWINDOW_Poll();
 bool GAMEWINDOW_ReadSettings();
 void GAMEWINDOW_ReadIngameSettings();
+void GAMEWINDOW_ApplyInGameSettings();
 void GAMEWINDOW_Init();
 void GAMEWINDOW_RestoreInput();

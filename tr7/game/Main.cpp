@@ -30,6 +30,7 @@
 #include "game/menu/UISystemGame.h"
 #include "game/menu/UIFadeGroup.h"
 #include "game/input/input.h"
+#include "game/CdcPlannerRuntime.h"
 
 MainTracker mainTrackerX;
 
@@ -46,8 +47,83 @@ char startUnit[32];
 
 int nosound;
 unsigned int gRndSeed;
+int DoMainMenu = 1;
 
 static ResolveObject* s_pShaderResources;
+
+InterfaceItem InterfaceItems[NUM_INTERFACE_ITEMS] =
+{
+	{
+		"nvidia",			// name
+		0,					// timeout
+		0,					// buttonTimeout
+		IFACE_ITEM_MOVIE,	// itemType
+		TITLE_SCREEN,		// nextItem
+		8.0,				// fadeUpSpeed
+		8.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	},
+	{
+		"title",			// name
+		0,					// timeout
+		0,					// buttonTimeout
+		IFACE_ITEM_MOVIE,	// itemType
+		-1,					// nextItem
+		8.0,				// fadeUpSpeed
+		8.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	},
+	{
+		"legal",			// name
+		300,				// timeout
+		300,				// buttonTimeout
+		IFACE_ITEM_SCREEN,	// itemType
+		NVIDIA_SCREEN,		// nextItem
+		16.0,				// fadeUpSpeed
+		16.0,				// fadeDownSpeed
+		kUIScreenFELegalID	// pushScreenID
+	},
+	{
+		"credits",			// name
+		0,					// timeout
+		0,					// buttonTimeout
+		IFACE_ITEM_MOVIE,	// itemType
+		-1,					// nextItem
+		16.0,				// fadeUpSpeed
+		16.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	},
+	{
+		"theend_1",			// name
+		300,				// timeout
+		10,					// buttonTimeout
+		IFACE_ITEM_SCREEN,	// itemType
+		OUT2_SCREEN,		// nextItem
+		16.0,				// fadeUpSpeed
+		16.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	},
+	{
+		"theend_2",			// name
+		0,					// timeout
+		10,					// buttonTimeout
+		IFACE_ITEM_SCREEN,	// itemType
+		MOVIE_CREDITS,		// nextItem
+		16.0,				// fadeUpSpeed
+		16.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	},
+	{
+		"end",				// name
+		0,					// timeout
+		0,					// buttonTimeout
+		IFACE_ITEM_MOVIE,	// itemType
+		MOVIE_CREDITS,		// nextItem
+		16.0,				// fadeUpSpeed
+		16.0,				// fadeDownSpeed
+		kUIScreenNoneID		// pushScreenID
+	}
+};
 
 cdc::FileSystem* GetFS()
 {
@@ -109,6 +185,25 @@ bool MainG2()
 	MAIN_DoMainInit();
 
 	DEBUG_Init();
+
+	CdcPlannerInit();
+
+	GAMEWINDOW_ReadIngameSettings();
+	GAMEWINDOW_ApplyInGameSettings();
+
+	strcpy(gameTrackerX.baseAreaName, startUnit);
+
+	if (DoMainMenu)
+	{
+		mainTrackerX.movieNum = 2;
+		mainTrackerX.mainState = InterfaceItems[0].itemType == IFACE_ITEM_SCREEN ? 7 : 3;
+	}
+	else
+	{
+		mainTrackerX.mainState = 2;
+	}
+
+	MainG2_UpdateLoop();
 
 	while (true)
 	{
