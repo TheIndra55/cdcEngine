@@ -8,6 +8,10 @@ struct SoundGroup
 {
 };
 
+struct SoundGroupAssignmentsOBSOLETE
+{
+};
+
 struct SoundStreamHolder
 {
 };
