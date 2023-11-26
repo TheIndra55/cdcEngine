@@ -19,6 +19,17 @@
 #include "game/font.h"
 #include "game/debug.h"
 #include "game/pc/gamewindow.h"
+#include "game/Camera/Camera.h" 
+#include "game/sound/dynsfx.h"
+#include "game/menu/menu.h"
+#include "game/Save/SaveInfo.h"
+#include "game/menu/mainmenu.h"
+#include "game/menu/UIItemImage.h"
+#include "game/menu/UICommandManager.h"
+#include "game/menu/UISystem.h"
+#include "game/menu/UISystemGame.h"
+#include "game/menu/UIFadeGroup.h"
+#include "game/input/input.h"
 
 MainTracker mainTrackerX;
 
@@ -32,6 +43,9 @@ char ActiveBuildName[16];
 char ActiveBuildDir[32];
 
 char startUnit[32];
+
+int nosound;
+unsigned int gRndSeed;
 
 static ResolveObject* s_pShaderResources;
 
@@ -137,6 +151,29 @@ void MAIN_DoMainInit()
 	Font::Init();
 
 	GAMELOOP_ClearGameTracker();
+
+	CAMERA_Initialize(&theCamera);
+
+	if (nosound)
+	{
+		DYNSFX_StopAllSfx(false);
+	}
+
+	MENU_Init(&gameTrackerX);
+	SAVE_Init();
+
+	gRndSeed = 0;
+
+	MAINMENU_SetTitleUnitForChapter(0);
+
+	UIImageManager::Init();
+	UICommandManager::Init();
+	UISystem::Init(new UISystemGame());
+	UIScreenManager::DeregisterAllData();
+	UIFadeGroupInit();
+
+	INPUT_Init();
+	GAMEWINDOW_RestoreInput();
 }
 
 void SetupBuildDir(const char* configName)

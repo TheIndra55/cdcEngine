@@ -33,3 +33,5 @@ struct GlobalSaveTracker
 };
 
 extern GlobalSaveTracker* GlobalSave;
+
+void SAVE_Init();

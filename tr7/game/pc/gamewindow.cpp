@@ -116,3 +116,7 @@ void GAMEWINDOW_Init()
 		ShowWindow(gInputHwnd, SW_SHOW);
 	}
 }
+
+void GAMEWINDOW_RestoreInput()
+{
+}
