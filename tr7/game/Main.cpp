@@ -31,6 +31,7 @@
 #include "game/menu/UIFadeGroup.h"
 #include "game/input/input.h"
 #include "game/CdcPlannerRuntime.h"
+#include "game/pc/movie/movie.h"
 
 MainTracker mainTrackerX;
 
@@ -136,6 +137,8 @@ void InitFS()
 
 	g_pDiskFS = fileSystem;
 	g_pFS = fileSystem;
+
+	MOVIE_SetFileSystem(fileSystem);
 }
 
 void InitArchive()
