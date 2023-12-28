@@ -32,6 +32,7 @@
 #include "game/input/input.h"
 #include "game/CdcPlannerRuntime.h"
 #include "game/pc/movie/movie.h"
+#include "game/Gameloop.h"
 
 MainTracker mainTrackerX;
 
@@ -210,6 +211,7 @@ bool MainG2()
 
 	while (true)
 	{
+		GAMELOOP_MainLoop(&gameTrackerX);
 		MainG2_UpdateLoop();
 
 		RenderG2_BeginScene(true);

@@ -5,6 +5,9 @@
 #include "OBTable.h"
 #include "event.h"
 #include "Save/SaveInfo.h"
+#include "input/input.h"
+#include "Scene/Scene.h"
+#include "pc/D3D/RenderRA.h"
 
 GameTracker gameTrackerX;
 
@@ -79,4 +82,44 @@ void GAMELOOP_ClearGameTracker()
 	gameTrackerX.playerInstance = nullptr;
 	gameTrackerX.activeCinematic = nullptr;
 	gameTrackerX.playerMarkerObjectID = OBTABLE_GetObjectID("player");
+}
+
+bool GAMELOOP_DisplayGameElements(GameTracker* gameTracker)
+{
+	gameTracker->displayFrameCount++;
+
+	return true;
+}
+
+void GAMELOOP_DisplayFrame(GameTracker* gameTracker)
+{
+	if (SceneLayer::s_enabled)
+	{
+		SceneLayer::Update();
+	}
+
+	RenderG2_BeginScene(true);
+
+	if (!GAMELOOP_DisplayGameElements(gameTracker))
+	{
+		RenderG2_EndScene(frameRate_Unlocked);
+	}
+	else
+	{
+		RenderG2_EndScene(frameRate_DefaultLocked);
+	}
+}
+
+void GAMELOOP_Process(GameTracker* gameTracker)
+{
+}
+
+void GAMELOOP_MainLoop(GameTracker* gameTracker)
+{
+	INPUT_Process();
+
+	GAMELOOP_Process(gameTracker);
+	GAMELOOP_DisplayFrame(gameTracker);
+
+	gameTracker->frameCount++;
 }

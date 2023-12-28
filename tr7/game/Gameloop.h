@@ -163,3 +163,4 @@ void GAMELOOP_AllocStaticMemory();
 void GAMELOOP_InitGameTracker();
 void GAMELOOP_SystemInit();
 void GAMELOOP_ClearGameTracker();
+void GAMELOOP_MainLoop(GameTracker* gameTracker);
