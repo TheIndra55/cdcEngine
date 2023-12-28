@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "stream.h"
 
@@ -7,10 +8,15 @@
 #include "game/OBTable.h"
 #include "game/Main.h"
 #include "game/pc/D3D/d3dinstance.h"
+#include "game/pc/D3D/d3dterrain.h"
+#include "game/input/input.h"
 
 StreamUnitList* gUnitList = nullptr;
 
 ObjectTracker GlobalObjects[MAX_OBJECTS];
+STracker StreamTracker;
+
+bool gNoObjectLoad;
 
 void STREAM_Init()
 {
@@ -155,4 +161,76 @@ int InsertGlobalObject(int id)
 	object->numObjectsUsing = 0;
 
 	return i;
+}
+
+void STREAM_LoadLevelObjects(StreamUnit* stream)
+{
+}
+
+void STREAM_FinishLoad(StreamUnit* streamUnit)
+{
+	auto level = streamUnit->level;
+
+	if (level->versionNumber != 0x4C204BB)
+	{
+		cdc::FatalError("Wrong version number (%X) for unit %s, code is at version %x.\n", level->versionNumber, streamUnit->baseAreaName, 0x4C204BB);
+	}
+
+	streamUnit->used = 2;
+
+	if (!gNoObjectLoad)
+	{
+		STREAM_LoadLevelObjects(streamUnit);
+	}
+
+	DRAW_PrepareAreaForDraw(level);
+
+	streamUnit->fogNear = level->fogNear;
+	streamUnit->fogFar = level->fogFar;
+	streamUnit->farPlane = level->farPlane;
+	streamUnit->fogR = level->backColorR;
+	streamUnit->fogG = level->backColorG;
+	streamUnit->fogB = level->backColorB;
+	streamUnit->fogOverrideFlag = 0;
+
+	if (level->relocModule)
+	{
+	}
+}
+
+void STREAM_LoadLevelReturn(void* loadData, void* data, void* data2, ResolveObject* pResolveObj)
+{
+	auto level = (Level*)loadData;
+	auto streamUnit = (StreamUnit*)data2;
+
+	streamUnit->StreamUnitID = level->streamUnitID;
+	gameTrackerX.StreamUnitID = level->streamUnitID;
+	gameTrackerX.level = level;
+
+	INPUT_ResetStatus();
+	STREAM_FinishLoad(streamUnit);
+}
+
+StreamUnit* STREAM_LoadLevel(char* baseAreaName, StreamUnitPortal* streamPortal, bool loadObjects)
+{
+	char dramName[256];
+	LOAD_UnitFileName(dramName, baseAreaName, "drm");
+
+	auto level = &StreamTracker.StreamList[0];
+	level->FrameCount = 0;
+	level->unitFlags = 0;
+	level->unitHidden = 0;
+	level->loadData = nullptr;
+
+	if (streamPortal)
+	{
+	}
+	else
+	{
+		strcpy(gameTrackerX.baseAreaName, baseAreaName);
+
+		level->resolveObj = Resolve::Load(dramName, STREAM_LoadLevelReturn, nullptr, level, (void**)&StreamTracker.StreamList[0].level);
+	}
+
+	return level;
 }

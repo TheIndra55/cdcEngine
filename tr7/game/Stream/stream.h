@@ -2,8 +2,13 @@
 
 #include "game/resolve/Resolve.h"
 #include "game/Animation/anitracker.h"
+#include "game/terrain.h"
+#include "game/markup.h"
+#include "game/event.h"
 
 #include "cdc/runtime/cdcMath/Vector.h"
+#include "cdc/runtime/cdcScene/Source/SceneCellGroup.h"
+#include "cdc/runtime/cdcPlanner/AreaDBase.h"
 
 struct StreamUnitObjectList
 {
@@ -21,10 +26,6 @@ struct StreamUnitList
 {
 	int numUnits;
 	UnitInfo unit[1];
-};
-
-struct Level
-{
 };
 
 struct ObjectDTPData
@@ -79,10 +80,6 @@ struct BoneMirrorData
 };
 
 struct SVector
-{
-};
-
-struct MarkUp
 {
 };
 
@@ -242,11 +239,244 @@ struct ObjectTracker
 	void* vramBlock;
 };
 
+struct RECT_PSX
+{
+	__int16 x;
+	__int16 y;
+	__int16 w;
+	__int16 h;
+};
+
+struct StreamUnitPortal
+{
+};
+
+struct CameraKey
+{
+};
+
+struct Intro
+{
+};
+
+struct Signal
+{
+};
+
+struct SplineCameraLevelData
+{
+};
+
+struct SFXMkr
+{
+};
+
+struct PlanData
+{
+};
+
+struct AttackWaveList
+{
+};
+
+struct AttackWaveGroupList
+{
+};
+
+struct CombatDoorsList
+{
+};
+
+struct TerrainLight
+{
+};
+
+struct SpecialMarkerList
+{
+};
+
+struct MoveData
+{
+};
+
+namespace dtp
+{
+	struct UnitData
+	{
+	};
+
+	struct ADMD
+	{
+	};
+}
+
+struct Level
+{
+	Terrain* terrain;
+
+	float waterZLevel;
+
+	char backColorR;
+	char backColorG;
+	char backColorB;
+	char cpad1;
+
+	char spectralColorR;
+	char spectralColorG;
+	char spectralColorB;
+	char spectralFXAlways;
+
+	char waterColorR;
+	char waterColorG;
+	char waterColorB;
+	char waterBlend;
+
+	float farPlane;
+	float fogFar;
+	float fogNear;
+
+	float spectralFarPlane;
+	float spectralFogFar;
+	float spectralFogNear;
+
+	float waterFarPlane;
+	float waterFogFar;
+	float waterFogNear;
+
+	int UnderwaterFXAlpha;
+	float UnderwaterFXMovement;
+	float UnderwaterFXSpeed;
+
+	int SpectralFXAlpha;
+	float SpectralFXIncrease;
+	float SpectralFXCenter;
+
+	int WaterFXAlpha;
+	float WaterFXMovement;
+	float WaterFXSpeed;
+	int WaterFSFX;
+
+	int numMarkUps;
+	MarkUp* markupList;
+
+	int numCameras;
+	CameraKey* cameraList;
+
+	int flags;
+
+	int numIntros;
+	Intro* introList;
+
+	unsigned __int16* objectNameList;
+
+	char* worldName;
+
+	Signal* startGoingIntoWaterSignal;
+	Signal* startGoingOutOfWaterSignal;
+
+	int unitFlags;
+
+	Signal* SignalListStart;
+	__int16* SignalIDList;
+
+	SplineCameraLevelData* splineCameraData;
+
+	void* relocModule;
+
+	int NumberOfSFXMarkers;
+	SFXMkr* SFXMarkerList;
+
+	unsigned int versionNumber;
+	unsigned int guiID;
+	char* dynamicMusicName;
+
+	int streamUnitID;
+	struct VramLink* textureLoadList;
+
+	PlanData* planData;
+
+	unsigned int mapRegion;
+	__int16** WeatherHeightmapData;
+
+	AttackWaveList* attackWaveList;
+	AttackWaveGroupList* attackWaveGroupList;
+
+	CombatDoorsList* combatDoorsList;
+
+	int numTerrainLights;
+	TerrainLight* terrainLights;
+	unsigned __int16** terrainLightGrids;
+
+	SpecialMarkerList* vmarkerList;
+	SpecialMarkerList* pmarkerList;
+
+	char* playerName;
+	unsigned int levelCount;
+
+	MoveData* moveData;
+
+	void* pCdcPlannerData;
+	cdc::AreaDBase* pAreaDBase;
+	dtp::UnitData* pUnitData;
+	dtp::ADMD* pADMDData;
+
+	cdc::Vector3 sceneCenterOffset;
+
+	__int16 playerObjectID;
+};
+
+struct GameTracker;
+
+struct StreamUnit
+{
+	int StreamUnitID;
+
+	char used;
+	char unitHidden;
+	__int16 unitFlags;
+
+	Level* level;
+	char baseAreaName[20];
+
+	ResolveObject* resolveObj;
+	void* loadData;
+
+	float fogNear;
+	float fogFar;
+	float farPlane;
+
+	char fogR;
+	char fogG;
+	char fogB;
+	char fogOverrideFlag;
+
+	unsigned int FrameCount;
+
+	RECT_PSX cliprect;
+
+	int draw;
+	int drawtime;
+
+	void(__cdecl* EventMain)(GameTracker* gameTracker, StreamUnit* unit, GlobalData* globalData);
+	void(__cdecl* CallTrigger)(int trigger);
+	unsigned int(__cdecl* IsTriggerActive)(int trigger);
+
+	cdc::ISceneCellGroup* pCellGroup;
+};
+
+struct STracker
+{
+	StreamUnit StreamList[8];
+};
+
 #define MAX_OBJECTS 94
 
 extern ObjectTracker GlobalObjects[MAX_OBJECTS];
+extern STracker StreamTracker;
 
 void STREAM_Init();
 ObjectTracker* STREAM_GetObjectTrackerByName(char* name);
 
 int InsertGlobalObject(int id);
+
+StreamUnit* STREAM_LoadLevel(char* baseAreaName, StreamUnitPortal* streamPortal, bool loadObjects);
