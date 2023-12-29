@@ -464,12 +464,13 @@ struct StreamUnit
 	cdc::ISceneCellGroup* pCellGroup;
 };
 
+#define MAX_OBJECTS 94
+#define MAX_STREAM_UNITS 8
+
 struct STracker
 {
-	StreamUnit StreamList[8];
+	StreamUnit StreamList[MAX_STREAM_UNITS];
 };
-
-#define MAX_OBJECTS 94
 
 extern ObjectTracker GlobalObjects[MAX_OBJECTS];
 extern STracker StreamTracker;

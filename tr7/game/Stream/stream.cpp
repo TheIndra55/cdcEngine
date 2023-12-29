@@ -4,12 +4,15 @@
 #include "stream.h"
 
 #include "cdc/runtime/cdcSys/Assert.h"
+#include "cdc/runtime/cdcSys/Trace.h"
 
 #include "game/OBTable.h"
 #include "game/Main.h"
 #include "game/pc/D3D/d3dinstance.h"
 #include "game/pc/D3D/d3dterrain.h"
 #include "game/input/input.h"
+
+cdc::TraceLog g_streamLog("Stream", &cdc::g_defaultLog, cdc::TraceLog::Enabled);
 
 StreamUnitList* gUnitList = nullptr;
 
@@ -173,6 +176,8 @@ void STREAM_FinishLoad(StreamUnit* streamUnit)
 
 	if (level->versionNumber != 0x4C204BB)
 	{
+		//DBG_Print("Make sure you have the latest code and latest tools.\n");
+
 		cdc::FatalError("Wrong version number (%X) for unit %s, code is at version %x.\n", level->versionNumber, streamUnit->baseAreaName, 0x4C204BB);
 	}
 
@@ -196,6 +201,8 @@ void STREAM_FinishLoad(StreamUnit* streamUnit)
 	if (level->relocModule)
 	{
 	}
+
+	cdc::TraceCheckFilterAndPrint(g_streamLog.GetIndex(), "Loaded unit: %s\n", streamUnit->baseAreaName);
 }
 
 void STREAM_LoadLevelReturn(void* loadData, void* data, void* data2, ResolveObject* pResolveObj)
@@ -217,6 +224,9 @@ StreamUnit* STREAM_LoadLevel(char* baseAreaName, StreamUnitPortal* streamPortal,
 	LOAD_UnitFileName(dramName, baseAreaName, "drm");
 
 	auto level = &StreamTracker.StreamList[0];
+
+	level->used = 1;
+	strcpy(level->baseAreaName, baseAreaName);
 	level->FrameCount = 0;
 	level->unitFlags = 0;
 	level->unitHidden = 0;
