@@ -88,6 +88,15 @@ bool GAMELOOP_DisplayGameElements(GameTracker* gameTracker)
 {
 	gameTracker->displayFrameCount++;
 
+	if (SceneLayer::s_enabled)
+	{
+		SceneLayer::Render(nullptr);
+	}
+	else
+	{
+		TERRAIN_DrawUnits();
+	}
+
 	return true;
 }
 

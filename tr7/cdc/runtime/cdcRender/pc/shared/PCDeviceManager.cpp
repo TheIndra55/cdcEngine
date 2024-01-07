@@ -8,11 +8,26 @@ cdc::PCDeviceManager::PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D)
 	: m_refCount(0), m_adapters(), m_bIsRecreatingResources(false), m_status(kStatusNotInitialized),
 	  m_pFirstResource(nullptr), m_pLastResource(nullptr), m_pD3DDevice(nullptr), m_hFocusWindow(0), m_settings(),
 	  m_d3dPresentParams(), m_d3dDevType(D3DDEVTYPE_HAL), m_d3dBehaviorFlags(0), m_d3dCaps(),
-	  m_isPixelShader20(false), m_isPixelShader30(false), m_pCurrentContext(nullptr)
+	  m_isPixelShader20(false), m_isPixelShader30(false), m_pCurrentContext(nullptr), m_pShaderManager()
 {
 	m_pD3D = pD3D;
 
 	EnumAdaptersAndModes(false);
+}
+
+cdc::PCDeviceManager::Status cdc::PCDeviceManager::GetStatus()
+{
+	return m_status;
+}
+
+bool cdc::PCDeviceManager::IsStatusOk()
+{
+	return m_status == kStatusOk;
+}
+
+bool cdc::PCDeviceManager::IsCreatingResources()
+{
+	return m_bIsRecreatingResources;
 }
 
 bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
@@ -57,6 +72,26 @@ bool cdc::PCDeviceManager::Init(HWND hFocusWindow, Settings* settings)
 	}
 
 	return false;
+}
+
+IDirect3DDevice9* cdc::PCDeviceManager::GetD3DDevice()
+{
+	return m_pD3DDevice;
+}
+
+cdc::PCDeviceManager::Settings* cdc::PCDeviceManager::GetSettings()
+{
+	return &m_settings;
+}
+
+cdc::PCShaderManager* cdc::PCDeviceManager::GetShaderManager()
+{
+	return m_pShaderManager;
+}
+
+cdc::PCStateManager* cdc::PCDeviceManager::GetStateManager()
+{
+	return m_pStateManager;
 }
 
 void cdc::PCDeviceManager::Destroy()
@@ -307,8 +342,8 @@ cdc::PCDeviceManager* cdc::PCDeviceManager::Create()
 
 void cdc::PCDeviceManager::SettingsChanged()
 {
-	m_isPixelShader30 = true;
-	m_isPixelShader20 = true;
+	m_isPixelShader30 = false;
+	m_isPixelShader20 = false;
 }
 
 bool cdc::PCDeviceManager::GetAdapterRect(unsigned int adapterId, RECT* rect)
@@ -328,4 +363,5 @@ cdc::PCDeviceManager::Settings::Settings()
 	fullscreen = false;
 	enableVSync = true;
 	enableFSAA = false;
+	dontDeferShaderCreation = false;
 }

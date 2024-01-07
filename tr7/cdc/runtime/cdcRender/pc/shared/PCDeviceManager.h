@@ -5,6 +5,7 @@
 
 #include "PCStateManager.h"
 #include "PCRenderContext.h"
+#include "PCShaderManager.h"
 
 #include "cdc/runtime/cdcSys/Array.h"
 
@@ -46,6 +47,8 @@ namespace cdc
 			bool enableVSync;
 			bool enableFSAA;
 
+			bool dontDeferShaderCreation;
+
 			Settings();
 		};
 
@@ -74,6 +77,7 @@ namespace cdc
 
 		HWND m_hFocusWindow;
 
+		PCShaderManager* m_pShaderManager;
 		PCStateManager* m_pStateManager;
 
 	private:
@@ -83,7 +87,16 @@ namespace cdc
 	public:
 		PCDeviceManager(HINSTANCE pD3DLib, IDirect3D9* pD3D);
 
+		Status GetStatus();
+		bool IsStatusOk();
+		bool IsCreatingResources();
+
 		bool Init(HWND hFocusWindow, Settings* settings);
+
+		IDirect3DDevice9* GetD3DDevice();
+		Settings* GetSettings();
+		PCShaderManager* GetShaderManager();
+		PCStateManager* GetStateManager();
 
 		void ReleaseDevice(Status status);
 		bool CreateDevice(Settings* settings);
