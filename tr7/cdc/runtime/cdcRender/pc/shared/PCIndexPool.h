@@ -27,6 +27,8 @@ namespace cdc
 		Bin* CreateBin();
 		bool CreateBinIndexBuffer(Bin* pBin);
 
+		void EndScene();
+
 		bool OnCreateDevice();
 		void OnDestroyDevice();
 	};

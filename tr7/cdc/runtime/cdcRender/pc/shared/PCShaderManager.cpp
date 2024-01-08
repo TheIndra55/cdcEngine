@@ -1,4 +1,5 @@
 #include "PCShaderManager.h"
+#include "PCShaderBinary.h"
 
 cdc::PCShaderManager::PCShaderManager() : m_pixelShaderList(), m_vertexShaderList()
 {
@@ -8,7 +9,17 @@ cdc::PCShaderManager::PCShaderManager() : m_pixelShaderList(), m_vertexShaderLis
 	m_peakVertexShaders = 0;
 }
 
+template <class T>
+T* cdc::PCShaderManager::CreateShader(unsigned int* pData, bool copyFunction)
+{
+	//cdc::PCShaderBinary binary(pData, false);
+
+	auto shader = new T(pData, copyFunction);
+
+	return shader;
+}
+
 cdc::PCVertexShader* cdc::PCShaderManager::CreateVertexShader(unsigned int* pFunction, bool copyData)
 {
-	return nullptr;
+	return CreateShader<PCVertexShader>(pFunction, copyData);
 }

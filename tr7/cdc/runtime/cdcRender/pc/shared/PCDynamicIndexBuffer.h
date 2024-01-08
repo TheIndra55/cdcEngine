@@ -17,6 +17,7 @@ namespace cdc
 		PCDynamicIndexBuffer(IDirect3DIndexBuffer9* pD3DIndexBuffer, void* pIndexData, unsigned int baseIndex, unsigned int numIndices);
 
 		unsigned int GetBaseIndex();
+		unsigned __int16* Lock();
 
 		IDirect3DIndexBuffer9* GetD3DIndexBuffer();
 		unsigned int GetNumIndices();

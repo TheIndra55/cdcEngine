@@ -24,6 +24,9 @@ static DeviceCallback* s_pDeviceCallback;
 static cdc::PCIndexPool* s_pDynamicIndexPool;
 static cdc::PCDrawableList* s_pDrawLists[14];
 
+static cdc::Matrix s_projectionMatrix;
+float gProjectionDistance = 512.f;
+
 bool D3D_PreInit()
 {
 	int regs[4];
@@ -76,11 +79,38 @@ void D3D_BeginScene(bool enableReflection)
 	}
 }
 
+void D3D_ActivateMatrix(float screenZ)
+{
+	cdc::Matrix m;
+	memcpy(&m, &s_projectionMatrix, sizeof(m));
+
+	if (screenZ != 0.f)
+	{
+		// TODO
+	}
+
+	cdc::PCDeviceManager::s_pInstance->GetStateManager()->SetVertexConstantMatrix4x4(0, &m);
+}
+
 void D3D_PrevGen_EndScene()
 {
 	if (cdc::PCDeviceManager::s_pInstance->IsStatusOk())
 	{
+		memset(&s_projectionMatrix, 0, sizeof(s_projectionMatrix));
+
+		// TODO figure out these values
+		s_projectionMatrix.col2.z = 1.0001221f;
+		s_projectionMatrix.col2.w = 1.0f;
+		s_projectionMatrix.col3.z = -16.001953f;
+		s_projectionMatrix.col0.x = gProjectionDistance * 0.001953125f + gProjectionDistance * 0.001953125f;
+		s_projectionMatrix.col1.y = gProjectionDistance * 0.002232143f * -2.f;
+
+		D3D_ActivateMatrix(0.f);
+
+		s_pDynamicIndexPool->EndScene();
+
 		s_pDrawLists[0]->Draw(cdc::PC_PASS_OPAQUE, &g_dummyScene);
+		s_pDrawLists[0]->Clear();
 	}
 }
 
@@ -115,6 +145,17 @@ void D3D_PrevGen_Init()
 	for (int i = 0; i < 14; i++)
 	{
 		s_pDrawLists[i] = new cdc::PCDrawableList();
+	}
+}
+
+void D3D_SetFog(int r, int g, int b, float fognear, float fogfar)
+{
+	if (cdc::PCDeviceManager::s_pInstance->IsStatusOk())
+	{
+		auto fog = 1.f / (fognear - fogfar);
+
+		float const4[4] = { fog, -(fog * fogfar), 0.f, 1.f };
+		cdc::PCDeviceManager::s_pInstance->GetStateManager()->SetVertexConstants(4, const4, 1);
 	}
 }
 
@@ -164,6 +205,8 @@ bool DeviceCallback::OnCreateDevice()
 			stateManager->SetRenderState(D3DRS_FOGENABLE, TRUE);
 
 			stateManager->SetPixelShader(nullptr);
+
+			D3D_SetFog(0, 0, 0, 131070.f, 131071.f);
 		}
 
 		localstr_set_gfx_gen(inNextGen);

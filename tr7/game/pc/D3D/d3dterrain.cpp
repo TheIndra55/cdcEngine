@@ -44,6 +44,7 @@ public:
 
 	void InitAddToRenderList(unsigned int nIndices);
 	unsigned int GetNumIndices();
+	void SetIndices(__int16* indices, int vertexCount);
 
 	void Draw(cdc::PCPass pass, cdc::PCDrawable* pPrevious);
 	bool Compare(cdc::PCPass pass, cdc::PCDrawable* pOther);
@@ -152,7 +153,9 @@ static void FinishUpTerrainGroup(TerrainGroup* bspTree, Terrain* terrain)
 			auto strip = material->strips[s];
 
 			auto drawable = new TerrainDrawable(material, strip, terrain, bspTree);
+
 			drawable->InitAddToRenderList(strip->vertexCount);
+			drawable->SetIndices(strip->stripVertex, strip->vertexCount);
 		}
 	}
 }
@@ -163,7 +166,7 @@ static void ClearTerrainGroupLists(TerrainGroup* bspTree)
 
 	for (int i = 0; i < materialList->numMaterials; i++)
 	{
-		materialList->materials[i].flags = 0;
+		materialList->materials[i].numStrips = 0;
 	}
 }
 
@@ -210,6 +213,14 @@ void TerrainDrawable::InitAddToRenderList(unsigned int nIndices)
 unsigned int TerrainDrawable::GetNumIndices()
 {
 	return m_nIndices;
+}
+
+void TerrainDrawable::SetIndices(__int16* indices, int vertexCount)
+{
+	auto data = m_pIndexBuffer->Lock();
+
+	memcpy(&data[m_nIndices], indices, sizeof(__int16) * vertexCount);
+	m_nIndices += vertexCount;
 }
 
 void TerrainDrawable::Draw(cdc::PCPass pass, cdc::PCDrawable* pPrevious)

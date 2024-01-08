@@ -38,7 +38,38 @@ cdc::PCIndexPool::PCIndexPool(unsigned int numInitialBins) : PCInternalResource(
 
 cdc::PCDynamicIndexBuffer* cdc::PCIndexPool::Create(unsigned int numIndices)
 {
-	return nullptr;
+	auto offset = 0;
+
+	while (true)
+	{
+		auto bin = m_pActiveBin;
+
+		if (bin->indexOffset + numIndices <= 65535)
+		{
+			offset = bin->indexOffset;
+			bin->indexOffset += numIndices;
+
+			break;
+		}
+
+		if (!bin->pNext)
+		{
+			auto newBin = CreateBin();
+
+			bin->pNext = newBin;
+			m_pActiveBin = newBin;
+
+			newBin->indexOffset = numIndices;
+		}
+
+		m_pActiveBin = bin;
+	}
+
+	auto bin = m_pActiveBin;
+
+	bin->pD3DIndexBuffer->Lock(0, 0, (void**)&bin->pIndexData, D3DLOCK_DISCARD);
+
+	return new cdc::PCDynamicIndexBuffer(bin->pD3DIndexBuffer, (void*)&bin->pIndexData[offset], offset, numIndices);
 }
 
 cdc::PCIndexPool::Bin* cdc::PCIndexPool::CreateBin()
@@ -70,6 +101,22 @@ bool cdc::PCIndexPool::CreateBinIndexBuffer(Bin* pBin)
 	}
 
 	return true;
+}
+
+void cdc::PCIndexPool::EndScene()
+{
+	for (Bin* bin = m_pIndexBins; bin != nullptr; bin = bin->pNext)
+	{
+		if (bin->pIndexData)
+		{
+			bin->pD3DIndexBuffer->Unlock();
+			bin->pIndexData = nullptr;
+		}
+
+		bin->indexOffset = 0;
+	}
+
+	m_pActiveBin = m_pIndexBins;
 }
 
 bool cdc::PCIndexPool::OnCreateDevice()

@@ -32,3 +32,9 @@ void cdc::PCDrawableList::Draw(PCPass pass, PCScene* pCurScene)
 		node->pElem->Draw(pass, nullptr);
 	}
 }
+
+void cdc::PCDrawableList::Clear()
+{
+	m_size = 0;
+	m_pHead = nullptr;
+}

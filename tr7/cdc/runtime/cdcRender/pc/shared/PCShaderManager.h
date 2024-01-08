@@ -21,6 +21,9 @@ namespace cdc
 	public:
 		PCShaderManager();
 
+		template <class T>
+		T* CreateShader(unsigned int* pData, bool copyFunction);
+
 		PCVertexShader* CreateVertexShader(unsigned int* pFunction, bool copyData);
 	};
 }

@@ -71,5 +71,6 @@ namespace cdc
 
 		void Draw(PCPass pass, PCScene* pCurScene);
 		void Add(PCDrawable* drawable);
+		void Clear();
 	};
 }

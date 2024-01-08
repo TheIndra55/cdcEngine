@@ -13,6 +13,11 @@ unsigned int cdc::PCDynamicIndexBuffer::GetBaseIndex()
 	return m_baseIndex;
 }
 
+unsigned __int16* cdc::PCDynamicIndexBuffer::Lock()
+{
+	return (unsigned __int16*)m_pIndexData;
+}
+
 IDirect3DIndexBuffer9* cdc::PCDynamicIndexBuffer::GetD3DIndexBuffer()
 {
 	return m_pD3DIndexBuffer;

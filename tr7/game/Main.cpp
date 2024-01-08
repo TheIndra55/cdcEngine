@@ -209,13 +209,15 @@ bool MainG2()
 
 	MainG2_UpdateLoop();
 
+#if 1
+	STREAM_LoadLevel("container1", nullptr, true);
+	GetFS()->Synchronize();
+#endif
+
 	while (true)
 	{
 		GAMELOOP_MainLoop(&gameTrackerX);
 		MainG2_UpdateLoop();
-
-		RenderG2_BeginScene(true);
-		RenderG2_EndScene(frameRate_DefaultLocked);
 	}
 
 	return false;
