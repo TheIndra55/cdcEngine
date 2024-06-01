@@ -6,12 +6,19 @@
 
 void D3DINSTANCE_Init()
 {
-	for (int i = 0; i < MAX_OBJECTS; i++)
+	if (D3D_InNextGenMode)
 	{
-		if (GlobalObjects[i].objectStatus == 2 && D3D_InNextGenMode)
+		for (int i = 0; i < MAX_OBJECTS; i++)
 		{
-			cdcRenderLayer::DRAW_PrepareObjectForDraw(GlobalObjects[i].object);
+			if (GlobalObjects[i].objectStatus == 2)
+			{
+				cdcRenderLayer::DRAW_PrepareObjectForDraw(GlobalObjects[i].object);
+			}
 		}
+	}
+	else
+	{
+		/* Legacy handler */
 	}
 }
 
