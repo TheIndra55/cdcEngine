@@ -1,6 +1,7 @@
 #include "snd.h"
 
 #include <stdint.h>
+#include <climits>
 
 static int ADPCM_asNextStep[16] = {
 	-1, -1, -1, -1, 2, 4, 6, 8,
@@ -31,7 +32,7 @@ void cdc::ADPCM_CalcTable()
 	{
 		if (ADPCM_asStep[i] > 0x1FFF) ADPCM_asStep[i] = 0x1FFF;
 
-		ADPCM_asStep[i] *= 4;
+		//ADPCM_asStep[i] *= 4;
 	}
 
 	for (int i = 0; i < 16; i++)
@@ -59,26 +60,78 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 {
 	while (numBlocks--)
 	{
-		*pDest = *pSrc;
 
-		auto step = ADPCM_asStep[pSrc[2]];
-		auto delta = step >> 3;
+	}
 
-		auto code = pSrc[4] >> 4;
+	*pDest = *(uint16_t*)pSrc;
 
-		if (code & 1) delta += (step >> 2);
-		if (code & 2) delta += (step >> 2);
-		if (code & 4) delta += step;
-		if (code & 8) delta  = -delta;
+	auto code = pSrc[4] >> 4;
+	auto step = ADPCM_asStep[pSrc[2]];
+	auto delta = step >> 3;
 
-		if (delta > 0x8000) delta = 0x8000;
-		if (delta < -0x8000) delta = -0x8000;
+	if (code & 1) delta += (step >> 2);
+	if (code & 2) delta += (step >> 1);
+	if (code & 4) delta += step;
+	if (code & 8) delta = -delta;
 
-		pDest[1] = delta;
+	delta += *(uint16_t*)pSrc;
 
-		for (int i = 0; i < 31; i++)
-		{
+	auto step2 = pSrc[2] + ADPCM_asNextStep[code];
 
-		}
+	if (delta > 0x7fff)  delta = 0x7fff;
+	if (delta < -0x8000) delta = -0x8000;
+
+	if (step2 > 88) step2 = 88;
+	if (step2 < 0) step2 = 0;
+
+	pDest[1] = (uint16_t)delta;
+
+	for (int i = 0; i < 31; i++)
+	{
+		auto code2 = pSrc[5];
+		auto var2 = ADPCM_asStep[step2];
+		auto delta2 = var2 >> 3;
+
+		if (code2 & 1) delta2 += (var2 >> 2);
+		if (code2 & 2) delta2 += (var2 >> 1);
+		if (code2 & 4) delta2 += var2;
+		if (code2 & 8) delta2 = -delta2;
+
+		delta2 += delta;
+
+		auto step3 = step2 + ADPCM_asNextStep[code2 & 0xf];
+
+		if (step3 > 88) step3 = 88;
+		if (step3 < 0) step3 = 0;
+
+		if (delta2 > 0x7fff)  delta2 = 0x7fff;
+		if (delta2 < -0x8000) delta2 = -0x8000;
+
+		pDest[2] = (uint16_t)delta2;
+
+		auto code3 = code2 >> 4;
+		auto var3 = ADPCM_asStep[step3];
+		auto delta3 = var3 >> 3;
+
+		if (code3 & 1) delta3 += (var3 >> 2);
+		if (code3 & 2) delta3 += (var3 >> 1);
+		if (code3 & 4) delta3 += var3;
+		if (code3 & 8) delta3 = -delta3;
+
+		delta3 += delta2;
+
+		step2 = step3 + ADPCM_asNextStep[code3];
+
+		if (step2 > 88) step2 = 88;
+		if (step2 < 0) step2 = 0;
+
+		if (delta3 > 0x7fff)  delta3 = 0x7fff;
+		if (delta3 < -0x8000) delta3 = -0x8000;
+
+		pDest[3] = (uint16_t)delta3;
+		delta = delta3;
+
+		pSrc++;
+		pDest += 2;
 	}
 }
