@@ -63,7 +63,7 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 
 	}
 
-	*pDest = *(uint16_t*)pSrc;
+	*pDest = *(int16_t*)pSrc;
 
 	auto code = pSrc[4] >> 4;
 	auto step = ADPCM_asStep[pSrc[2]];
@@ -74,7 +74,7 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 	if (code & 4) delta += step;
 	if (code & 8) delta = -delta;
 
-	delta += *(uint16_t*)pSrc;
+	delta += *(int16_t*)pSrc;
 
 	auto step2 = pSrc[2] + ADPCM_asNextStep[code];
 
@@ -84,7 +84,7 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 	if (step2 > 88) step2 = 88;
 	if (step2 < 0) step2 = 0;
 
-	pDest[1] = (uint16_t)delta;
+	pDest[1] = (int16_t)delta;
 
 	for (int i = 0; i < 31; i++)
 	{
@@ -107,7 +107,7 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 		if (delta2 > 0x7fff)  delta2 = 0x7fff;
 		if (delta2 < -0x8000) delta2 = -0x8000;
 
-		pDest[2] = (uint16_t)delta2;
+		pDest[2] = (int16_t)delta2;
 
 		auto code3 = code2 >> 4;
 		auto var3 = ADPCM_asStep[step3];
@@ -128,7 +128,7 @@ void cdc::ADPCM_Decode(unsigned char* pSrc, __int16* pDest, unsigned int numBloc
 		if (delta3 > 0x7fff)  delta3 = 0x7fff;
 		if (delta3 < -0x8000) delta3 = -0x8000;
 
-		pDest[3] = (uint16_t)delta3;
+		pDest[3] = (int16_t)delta3;
 		delta = delta3;
 
 		pSrc++;
