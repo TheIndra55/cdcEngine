@@ -455,6 +455,10 @@ void cdc::MSFileSystem::Request::AddRef()
 	m_Ref++;
 }
 
+void cdc::MSFileSystem::Request::Release()
+{
+}
+
 void cdc::MSFileSystem::Request::SetCompressedSize(unsigned int compressedSize)
 {
 }

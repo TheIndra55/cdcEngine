@@ -37,10 +37,9 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 	strcpy(tmpFileName, baseFileName);
 	strcat(tmpFileName, ".000");
 
-	auto receiver = new cdc::FileUserBufferReceiver();
+	auto receiver = new cdc::FileUserBufferReceiver(&m_numRecords);
 
 	// Read number of records
-	receiver->m_pBuffer = (char*)&m_numRecords;
 	auto request = m_pDiskFS->RequestRead(receiver, tmpFileName, 0);
 
 	request->SetSize(sizeof(m_numRecords));
@@ -53,7 +52,7 @@ bool ArchiveFileSystem::Open(const char* archiveFileName)
 
 	m_pHash = (unsigned int*)new char[size + 4];
 
-	receiver->m_pBuffer = (char*)m_pHash;
+	receiver = new cdc::FileUserBufferReceiver(m_pHash);
 	request = m_pDiskFS->RequestRead(receiver, tmpFileName, 0);
 
 	request->SetSize(size + 4);

@@ -24,6 +24,7 @@ namespace cdc
 		};
 
 		virtual void AddRef() = 0;
+		virtual void Release() = 0;
 		virtual void SetCompressedSize(unsigned int compressedSize) = 0;
 		virtual void SetSize(unsigned int size) = 0;
 		virtual Status GetStatus() = 0;
@@ -46,6 +47,8 @@ namespace cdc
 	public:
 		virtual FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset) = 0;
 		virtual unsigned int GetSize() = 0;
+
+		virtual ~File() { };
 	};
 
 	class FileSystem

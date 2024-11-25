@@ -61,6 +61,7 @@ namespace cdc
 			void Init(FileReceiver* receiver, const char* fileName, unsigned int fileHandle, unsigned int startOffset);
 
 			void AddRef();
+			void Release();
 			void SetCompressedSize(unsigned int compressedSize);
 			void SetSize(unsigned int size);
 			Status GetStatus();

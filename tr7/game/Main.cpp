@@ -304,9 +304,7 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 	}
 
 	auto buffer = new char[size + 1];
-
-	auto receiver = new cdc::FileUserBufferReceiver();
-	receiver->m_pBuffer = buffer;
+	auto receiver = new cdc::FileUserBufferReceiver(buffer);
 
 	auto request = pFS->RequestRead(receiver, fileName, 0);
 
