@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cdc/runtime/cdcFile/FileSystem.h"
+#include "MSFileSources.h"
 
 namespace cdc
 {
@@ -13,18 +14,6 @@ namespace cdc
 		READ_STATE_PAUSED,
 		READ_STATE_EXIT,
 		READ_STATE_DONE
-	};
-
-	class MSFileSource
-	{
-	public:
-		virtual int Open(const char* fileName) = 0;
-		virtual void Close(int fileHandle) = 0;
-		virtual bool Read(int fileHandle, unsigned int offset, unsigned int numReadBytes, void* target) = 0;
-		virtual bool GetReadResult(int fileHandle, unsigned int* numReadBytes) = 0;
-		virtual unsigned int GetSize(const char* fileName) = 0;
-		virtual unsigned int GetSize(int fileHandle) = 0;
-		virtual bool Exists(const char* fileName) = 0;
 	};
 
 	class MSFileSystem : public cdc::FileSystem

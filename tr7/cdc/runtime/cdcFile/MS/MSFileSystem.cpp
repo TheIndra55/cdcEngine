@@ -1,15 +1,10 @@
 #include "MSFileSystem.h"
-#include "MSFileSources.h"
 
 #include "cdc/runtime/cdcSys/Assert.h"
 
-cdc::MSFileSystem::MSFileSystem(const char* basePath)
-	: m_Requests{}, m_Queue(nullptr), m_Free(nullptr), m_numUsedRequests(0)
+cdc::MSFileSystem::MSFileSystem(const char* basePath) : m_FileSource(), m_Requests(), m_Queue(nullptr), m_Free(nullptr), m_numUsedRequests(0)
 {
-	auto fileSource = new MSFileSourceDisk();
-	strcpy(fileSource->m_basePath, basePath);
-
-	m_FileSource = fileSource;
+	m_FileSource = new MSFileSourceDisk(basePath);
 
 	SetupRequests();
 }
