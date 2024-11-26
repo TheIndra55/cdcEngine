@@ -67,14 +67,15 @@ void MultiplexStreamImpl::ProcessCinematicPacket(void* data, int size)
 void MultiplexStreamImpl::ProcessStream(void* data, int size)
 {
 	auto pos = 0;
+	int packetType, packetSize;
 
 	while (pos < size)
 	{
 		switch (m_processState)
 		{
 		case ReadingPacketHeader:
-			auto packetType = *(PacketType*)((char*)data + pos + 0);
-			auto packetSize = *(int*)((char*)data + pos + 0);
+			packetType = *(PacketType*)((char*)data + pos + 0);
+			packetSize = *(int*)       ((char*)data + pos + 0);
 			pos += 16;
 
 			switch (packetType)
@@ -82,10 +83,12 @@ void MultiplexStreamImpl::ProcessStream(void* data, int size)
 			case kSoundPacket:
 				m_processState = ReadingPacketInternalHeader;
 
+				break;
 			case kCinematicPacket:
 				m_processState = ReadingCinematicPacket;
 				m_packetBytesRemaining = packetSize;
 
+				break;
 			case kPaddingPacket:
 				m_processState = ReadingPaddingPacket;
 				m_packetBytesRemaining = packetSize;
@@ -95,7 +98,7 @@ void MultiplexStreamImpl::ProcessStream(void* data, int size)
 
 			break;
 		case ReadingPacketInternalHeader:
-			auto packetSize = *(int*)((char*)data + pos + 0);
+			packetSize = *(int*)((char*)data + pos + 0);
 			pos += 16;
 
 			m_packetBytesRemaining = packetSize;

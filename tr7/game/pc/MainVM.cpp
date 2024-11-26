@@ -9,6 +9,8 @@
 #include "timer.h"
 #include "setup.h"
 
+#include "cdc/runtime/cdcFile/DebugFileSystem.h"
+
 HANDLE hMainThread;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine, int nCmdShow)
@@ -26,6 +28,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR lpCmdLine,
 	{
 		forceOptions = 2;
 	}
+
+	cdc::DebugFileSystem::Create();
 
 	MSSave::Create();
 
