@@ -22,7 +22,7 @@ namespace cdc
 		class Request : public FileRequest
 		{
 		public:
-			cdc::MSFileSystem* m_FileSystem;
+			MSFileSystem* m_FileSystem;
 
 			bool m_IsInitialised;
 
@@ -48,6 +48,7 @@ namespace cdc
 			Request* m_Next;
 
 			void Init(FileReceiver* receiver, const char* fileName, unsigned int fileHandle, unsigned int startOffset);
+			bool IsInitialised();
 
 			void AddRef();
 			void Release();
@@ -64,6 +65,7 @@ namespace cdc
 		private:
 			MSFileSystem* m_FileSystem;
 
+		protected:
 			int m_FileHandle;
 			char m_pFileName[128];
 
@@ -74,12 +76,20 @@ namespace cdc
 
 			FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
 			unsigned int GetSize();
+			char* GetName();
 		};
+
+		static const unsigned int NUM_REQUESTS = 256;
+		static const unsigned int SECTOR_SIZE = 2048;
+		static const unsigned int READ_BUFFER_SIZE = 0;
+		static const unsigned int BLOCK_SIZE = 0x100000;
+		static const unsigned int BUFFER_SIZE = 0x100800;
+		static const unsigned int SEEK_THRESHOLD_SIZE = 0x40000;
 
 	private:
 		MSFileSource* m_FileSource;
 
-		char m_Buffer[0x100800];
+		char m_Buffer[BUFFER_SIZE];
 		int m_BytesInBuffer;
 
 		unsigned int m_BufferOffset;
@@ -90,7 +100,7 @@ namespace cdc
 
 		cdc::ReadState m_PausedReadState;
 
-		Request m_Requests[256];
+		Request m_Requests[NUM_REQUESTS];
 		Request* m_Queue;
 		Request* m_Free;
 		unsigned int m_numUsedRequests;
@@ -99,11 +109,21 @@ namespace cdc
 		MSFileSystem(const char* basePath);
 
 		void SetupRequests();
-		void PutInQueue(Request* request, cdc::FileRequest::Priority priority);
-		void RemoveFromQueue(Request* request);
-		unsigned int RoundToSectors(unsigned int size);
-		bool ProcessBuffer(char* buffer, Request* request, bool isReading);
+		void ReleaseRequests();
+
 		Request* PopFreeRequest();
+		void PushFreeRequest(Request* request);
+		void PutInQueue(Request* request, FileRequest::Priority priority);
+		void CancelRequest(Request* request);
+		void RemoveFromQueue(Request* request);
+		Request* GetCurrentRequest();
+		void PauseCurrentRequest();
+		void UnpauseCurrentRequest();
+
+		bool ProcessBuffer(char* buffer, Request* request, bool isReading);
+
+		unsigned int RoundToSectors(unsigned int size);
+		unsigned int GetNumQueuedRequests();
 
 		FileRequest* RequestRead(FileReceiver* receiver, const char* fileName, unsigned int startOffset);
 		cdc::File* OpenFile(const char* fileName);

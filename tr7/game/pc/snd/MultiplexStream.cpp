@@ -5,8 +5,16 @@
 #include "game/sound/sndapp.h"
 #include <cdc/runtime/cdcSound/win32/snd.h>
 
+MultiplexStreamImpl* MultiplexStreamImpl::s_activeStreamList = nullptr;
+
 char MultiplexStreamImpl::s_soundStreamDir[256];
 char MultiplexStreamImpl::s_cinematicStreamDir[256];
+
+LPCRITICAL_SECTION MultiplexStreamImpl::s_critSection = nullptr;
+
+MultiplexStream::MultiplexStream() : CinematicHandlerHost()
+{
+}
 
 void MultiplexStream::StopAllStreams()
 {
@@ -29,9 +37,81 @@ void MultiplexStream::SetCinematicDirectory(const char* dir)
 	strcpy_s(MultiplexStreamImpl::s_cinematicStreamDir, dir);
 }
 
-bool MultiplexStreamImpl::Init(StreamType type, char* name)
+void MultiplexStream::SetMusicDirectory(const char* dir)
+{
+}
+
+void MultiplexStream::SetBufferSize(int newSize)
+{
+}
+
+MultiplexStream* MultiplexStream::CreateSoundStream(const char* name)
+{
+	auto msi = new MultiplexStreamImpl();
+
+	if (msi->Init(kSoundStream, name))
+	{
+		return msi;
+	}
+
+	msi->Stop();
+	msi->CleanUp();
+
+	return nullptr;
+}
+
+MultiplexStream* MultiplexStream::CreateCinematicStream(const char* name)
+{
+	auto msi = new MultiplexStreamImpl();
+
+	if (msi->Init(kCinematicStream, name))
+	{
+		return msi;
+	}
+
+	msi->Stop();
+	msi->CleanUp();
+
+	return nullptr;
+}
+
+MultiplexStream* MultiplexStream::CreateMusicStream(const char* name)
+{
+	auto msi = new MultiplexStreamImpl();
+
+	if (msi->Init(kMusicStream, name))
+	{
+		return msi;
+	}
+
+	msi->Stop();
+	msi->CleanUp();
+
+	return nullptr;
+}
+
+MultiplexStreamImpl::MultiplexStreamImpl() : MultiplexStream()
+{
+	if (!s_critSection)
+	{
+		s_critSection = new CRITICAL_SECTION;
+		InitializeCriticalSection(s_critSection);
+	}
+
+	if (s_activeStreamList)
+	{
+		s_activeStreamList->m_prev = this;
+	}
+
+	m_next = s_activeStreamList;
+	m_prev = nullptr;
+	s_activeStreamList = this;
+}
+
+bool MultiplexStreamImpl::Init(StreamType type, const char* name)
 {
 	char fileName[256];
+	strcpy_s(fileName, name);
 
 	m_appHandle = SNDAPP_StreamOpenFile(fileName);
 
@@ -49,6 +129,24 @@ bool MultiplexStreamImpl::Init(StreamType type, char* name)
 	SNDAPP_StreamRequestData(m_appHandle, 0, 2048, MultiplexStreamImpl::ReadHeaderCallback, this);
 
 	return true;
+}
+
+void MultiplexStreamImpl::Stop()
+{
+}
+
+void MultiplexStreamImpl::Play()
+{
+}
+
+bool MultiplexStreamImpl::IsPlaying()
+{
+	return false;
+}
+
+bool MultiplexStreamImpl::IsCueing()
+{
+	return false;
 }
 
 void MultiplexStreamImpl::CleanUp()

@@ -8,6 +8,7 @@
 #include "cdc/runtime/cdcFile/FileSystem.h"
 #include "cdc/runtime/cdcFile/MS/MSFileSystem.h"
 #include "cdc/runtime/cdcFile/FileReceivers.h"
+#include "cdc/runtime/cdcSound/win32/snd.h"
 
 #include "game/archive/ArchiveFileSystem.h"
 #include "game/pc/snd/MultiplexStream.h"
@@ -156,6 +157,7 @@ void InitArchive()
 
 bool MainG2_UpdateLoop()
 {
+	cdc::SND_SystemTimer(gameTrackerX.actualTimeMult + gameTrackerX.actualTimeMult);
 	GAMEWINDOW_Poll();
 
 	return false;
@@ -209,7 +211,7 @@ bool MainG2()
 
 	MainG2_UpdateLoop();
 
-#if 1
+#if 0
 	STREAM_LoadLevel("container1", nullptr, true);
 	GetFS()->Synchronize();
 #endif
@@ -240,6 +242,7 @@ void MAIN_DoMainInit()
 		s_pShaderResources = Resolve::Load(shaderDRMName, nullptr, nullptr, nullptr, nullptr);
 	}
 
+#if 0
 	auto generalbank = STREAM_GetObjectTrackerByName("generalbank");
 	auto globalsoundinfo = STREAM_GetObjectTrackerByName("globalsoundinfo");
 
@@ -249,6 +252,7 @@ void MAIN_DoMainInit()
 	globalSoundInfo = (GlobalSoundInfo*)globalsoundinfo->object->data;
 
 	SOUND_CreateGroups(globalSoundInfo->soundGroup, globalSoundInfo->soundGroupCount);
+#endif
 
 	Font::Init();
 
@@ -266,7 +270,9 @@ void MAIN_DoMainInit()
 
 	gRndSeed = 0;
 
+#if 0
 	MAINMENU_SetTitleUnitForChapter(0);
+#endif
 
 	UIImageManager::Init();
 	UICommandManager::Init();
@@ -300,7 +306,7 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 
 	if (!size)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	auto buffer = new char[size + 1];
@@ -319,7 +325,7 @@ char* FSHelper_ReadFile(const char* fileName, char memType, cdc::FileSystem* pFS
 	}
 	else
 	{
-		return 0;
+		return nullptr;
 	}
 }
 

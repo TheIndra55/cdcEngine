@@ -44,10 +44,10 @@ unsigned int WaveSection::StartResource(unsigned int rtrID, unsigned __int16 ver
 
 int WaveSection::HandleResourceData(unsigned int rtrID, const char* pData, unsigned int dataSize, unsigned int offset)
 {
-	auto wave = &sfxPCWaveAttrTbl[rtrID];
+	auto pWave = &sfxPCWaveAttrTbl[rtrID];
 
-	auto ptr = pData;
-	auto remaining = dataSize;
+	auto dataOffset = 0u;
+	auto bytesRemaining = dataSize;
 
 	while (true)
 	{
@@ -58,20 +58,26 @@ int WaveSection::HandleResourceData(unsigned int rtrID, const char* pData, unsig
 			m_loader.headerLen = sizeof(Header);
 			m_loader.state = STATE_READ_HEADER;
 
+			break;
 		case STATE_READ_HEADER:
-			if (remaining < m_loader.headerLen)
+			if (bytesRemaining < m_loader.headerLen)
 			{
-				memcpy(m_loader.pHeader, ptr, remaining);
+				memcpy(m_loader.pHeader, &pData[dataOffset], bytesRemaining);
 
-				m_loader.pHeader += remaining;
-				m_loader.headerLen -= remaining;
+				m_loader.pHeader = (Header*)((char*)m_loader.pHeader + bytesRemaining);
+				m_loader.headerLen -= bytesRemaining;
 
-				return dataSize - remaining;
+				bytesRemaining = 0;
+
+				return dataSize - bytesRemaining;
 			}
 
-			memcpy(m_loader.pHeader, ptr, m_loader.headerLen);
+			memcpy(m_loader.pHeader, &pData[dataOffset], m_loader.headerLen);
 
-			wave->sampleRate = m_loader.header.sampleRate;
+			bytesRemaining -= m_loader.headerLen;
+			dataOffset += m_loader.headerLen;
+
+			pWave->sampleRate = m_loader.header.sampleRate;
 
 			m_loader.loopStart = m_loader.header.loopStart;
 			m_loader.loopEnd = m_loader.header.loopEnd;
@@ -79,11 +85,27 @@ int WaveSection::HandleResourceData(unsigned int rtrID, const char* pData, unsig
 			m_loader.buffer = nullptr;
 			m_loader.nBuffer = 0;
 
+			if (bytesRemaining == 0)
+				return dataSize - bytesRemaining;
+
+			break;
 		case STATE_READ_SAMPLE:
-			if (remaining >= wave->smpLen)
+			if (bytesRemaining >= pWave->smpLen)
 			{
-				wave->sampleData = cdc::SND_UploadSample((void*)ptr, wave->smpLen, m_loader.loopStart, m_loader.loopEnd);
+				pWave->sampleData = cdc::SND_UploadSample((void*)&pData[dataOffset], pWave->smpLen, m_loader.loopStart, m_loader.loopEnd);
+
+				bytesRemaining -= pWave->smpLen;
+				dataOffset += pWave->smpLen;
+
+				if (bytesRemaining == 0)
+					return dataSize - bytesRemaining;
+
+				break;
 			}
+
+			return dataSize - bytesRemaining;
+		case STATE_SAMPLE_CREATE_FAILED:
+			return dataSize;
 		}
 	}
 }
